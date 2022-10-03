@@ -1,35 +1,77 @@
 {
   "project_info": {
-    "project_number": "50700194989",
-    "firebase_url": "https://clothing-db-a092e.firebaseio.com",
-    "project_id": "clothing-db-a092e",
-    "storage_bucket": "clothing-db-a092e.appspot.com"
+    "project_number": "782103737429",
+    "project_id": "starconnect-4bd57",
+    "storage_bucket": "starconnect-4bd57.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:50700194989:android:56ce3d51b5095a9b68e224",
+        "mobilesdk_app_id": "1:782103737429:android:a5071a31b500b099fd90dc",
         "android_client_info": {
-          "package_name": "com.example.ecome_app"
+          "package_name": "com.git.sc"
         }
       },
       "oauth_client": [
         {
-          "client_id": "50700194989-0qne0tcqvcr99l5ql52p1apbots77jst.apps.googleusercontent.com",
+          "client_id": "782103737429-lodrrto6q6m5jbl0m7kuggd4bqg5gq3t.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAl_gZaS-TFnxLkIip1pWqLzJArcr9JEks"
+          "current_key": "AIzaSyC4xgaoLzK1L4wTOhQ9qwei45YC-QhcIOg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "50700194989-0qne0tcqvcr99l5ql52p1apbots77jst.apps.googleusercontent.com",
+              "client_id": "782103737429-lodrrto6q6m5jbl0m7kuggd4bqg5gq3t.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "782103737429-sjohv7qril4ruqg1aih6qf02rur1nri7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.git.sc"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:782103737429:android:9e439d681a629973fd90dc",
+        "android_client_info": {
+          "package_name": "com.git.sclite"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "782103737429-lodrrto6q6m5jbl0m7kuggd4bqg5gq3t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4xgaoLzK1L4wTOhQ9qwei45YC-QhcIOg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "782103737429-lodrrto6q6m5jbl0m7kuggd4bqg5gq3t.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "782103737429-sjohv7qril4ruqg1aih6qf02rur1nri7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.git.sc"
+              }
             }
           ]
         }
