@@ -11,9 +11,11 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:sc_lite/provider/user_provider.dart';
 import 'package:sc_lite/service/main_service.dart';
 import 'package:sc_lite/utils/extension.dart';
+import 'package:sc_lite/views/screen/checkinout/checkinout_screen.dart';
 import 'package:sc_lite/views/screen/login/login_screen.dart';
 import 'dart:math' as math;
 import 'package:badges/badges.dart';
+import 'package:sc_lite/views/widget/pin/pin.dart';
 
 import 'package:sc_lite/views/widget/present-alert-expired/present_alert_expired.dart';
 import 'package:sc_lite/views/widget/snackbar/snackbar_message.dart';
@@ -112,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     intervalLate.cancel();
     animationCtrl.dispose();
+    today = DateTime.now();
     super.dispose();
   }
 
@@ -121,9 +124,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     initPage();
     updateTime();
     createTutorial();
-    _scrollController.addListener(() {
-      print(_scrollController.position.maxScrollExtent);
-    });
   }
 
   refreshPage() async {
@@ -336,13 +336,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     mainService.getUrlHttp(url, false, (res) {
       if (res.statusCode == 200) {
         List content = jsonDecode(res.body)['content'];
+        if (content.isNotEmpty) {
+          // for (var data in content) {
+          //   mainService.getImage(data['imagePath']).then((value) {
+          //     setState(() {
+          //       newsFeed.add({
+          //         'link': data['url'],
+          //         'key': value,
+          //         'content': data['content'],
+          //         'id': data['newsFeedsId'],
+          //         'seq': data['sequenceNo'],
+          //         'name': data['name']
+          //       });
 
-        setState(() {
-          newsFeed = content;
-          newsFeed.sort((dynamic a, dynamic b) =>
-              a['sequenceNo'] > b['sequenceNo'] ? 1 : -1);
-          isNewsEmpty = newsFeed.isEmpty ? true : false;
-        });
+          //       newsFeed.sort((dynamic a, dynamic b) =>
+          //           a['sequenceNo'] > b['sequenceNo'] ? 1 : -1);
+          //       isNewsEmpty = newsFeed.isEmpty ? true : false;
+          //     });
+          //   });
+          // }
+          setState(() {
+            newsFeed = content;
+            newsFeed.sort((dynamic a, dynamic b) =>
+                a['sequenceNo'] > b['sequenceNo'] ? 1 : -1);
+            isNewsEmpty = newsFeed.isEmpty ? true : false;
+          });
+        }
       } else {
         mainService.errorHandlingHttp(res, context);
       }
@@ -497,6 +516,52 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           )
         ]);
   }
+
+  getSPTPeriod() async {
+    String urlApi = '${await mainService.urlApi()}/api/user/payruntax/taxyear';
+
+    mainService.getUrlHttp(urlApi, false, (dynamic res) {
+      if (res.statusCode == 200) {
+        List optPeriod = [];
+        res.forEach((dynamic element) => {
+              optPeriod.add({'value': element, 'selected': false})
+            });
+        if (optPeriod.isEmpty) {
+          showSnackbarError(context, 'No SPT period available');
+        } else {
+          openSPT1721(optPeriod);
+        }
+      } else {
+        mainService.errorHandlingHttp(res, context);
+      }
+    });
+  }
+
+  openPin(String action) {
+    return showGeneralDialog(
+      context: context,
+      pageBuilder: (context, animation, secondaryAnimation) => PinScreen(
+        action: action,
+      ),
+      transitionBuilder: (ctx, a1, a2, child) {
+        var curve = Curves.easeInOut.transform(a1.value);
+        return Transform.scale(
+          scale: curve,
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+
+  goToCheckinout(String page) {
+    Navigator.of(context)
+        .pushNamed(CheckinoutScreen.routeName, arguments: {'type': page});
+  }
+
+  openNews(dynamic data) {}
+
+  openSPT1721(dynamic optPeriod) async {}
 
   logout() {
     mainService.deleteStorage('SPS!#WU');
@@ -1192,7 +1257,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Column(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    goToCheckinout('CHECKIN');
+                                  },
                                   child: SvgPicture.asset(
                                     'assets/icon/home/check-in.svg',
                                     width: 54,
@@ -1276,7 +1343,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Column(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    goToCheckinout('CHECKOUT');
+                                  },
                                   child: SvgPicture.asset(
                                     'assets/icon/home/check-out.svg',
                                     width: 54,
@@ -1363,7 +1432,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               Column(
                                 children: [
                                   InkWell(
-                                    onTap: () {},
+                                    onTap: () {
+                                      openPin('payslip');
+                                    },
                                     child: SvgPicture.asset(
                                       'assets/icon/home/payslip.svg',
                                       width: 54,
@@ -1387,7 +1458,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               Column(
                                 children: [
                                   InkWell(
-                                    onTap: () {},
+                                    onTap: () {
+                                      openPin('spt');
+                                    },
                                     child: SvgPicture.asset(
                                       'assets/icon/home/spt.svg',
                                       width: 54,
@@ -1462,6 +1535,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       image: NetworkImage(
                                         i['imagePath'],
                                       ),
+                                      // image: MemoryImage(
+                                      //   i['key'],
+                                      // ),
                                     ),
                                   ),
                                 );

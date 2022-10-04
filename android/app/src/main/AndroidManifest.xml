@@ -32,6 +32,8 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBylcbhGHIgdSw-WCgExoB2wQp-fFy4Oco"/>
     </application>
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />

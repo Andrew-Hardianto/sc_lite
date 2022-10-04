@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:jwt_decode_full/jwt_decode_full.dart';
 import 'package:sc_lite/views/widget/snackbar/snackbar_message.dart';
@@ -574,5 +575,19 @@ class MainService {
         );
 
     return callback!(res);
+  }
+
+  Future getImage(dynamic url) async {
+    try {
+      var image =
+          await http.get(Uri.parse(url), headers: {'responseType': "blob"});
+      var data = image.body;
+      final List<int> codeUnits = data.codeUnits;
+      final Uint8List unit8List = Uint8List.fromList(codeUnits);
+
+      return unit8List;
+    } catch (e) {
+      return 'error';
+    }
   }
 }
