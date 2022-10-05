@@ -9,7 +9,7 @@ import 'package:location/location.dart';
 import 'package:sc_lite/utils/extension.dart';
 
 class CheckinoutScreen extends StatefulWidget {
-  static const String routeName = '/checkinout';
+  static const String routeName = '/self-service/checkinout';
   const CheckinoutScreen({super.key});
 
   @override
@@ -19,8 +19,6 @@ class CheckinoutScreen extends StatefulWidget {
 class _CheckinoutScreenState extends State<CheckinoutScreen>
     with TickerProviderStateMixin {
   dynamic dataType;
-  late Animation animationReload;
-  late AnimationController animationCtrl;
   double reload = 0.0;
 
   final mainService = MainService();
@@ -44,21 +42,17 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
   @override
   void initState() {
     super.initState();
-    animationCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1500));
   }
 
   @override
   void dispose() {
     super.dispose();
-    animationCtrl.dispose();
   }
 
   reloadMap() {
     setState(() {
-      reload = 360.0;
+      reload -= 1 / 1;
     });
-    animationCtrl.forward(from: 0);
   }
 
   submitData(BuildContext context) {}
@@ -110,6 +104,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                 Container(
                   height: 200,
                   width: double.infinity,
+                  margin: const EdgeInsets.only(top: 10),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
@@ -118,12 +113,13 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                 Container(
                   padding:
                       const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                  margin: const EdgeInsets.only(top: 15),
                   child: CupertinoSegmentedControl(
                     selectedColor: '#3DC0F0'.toColor(),
                     borderColor: '#3DC0F0'.toColor(),
                     pressedColor: Colors.blue.shade300,
                     groupValue: groupValue,
-                    children: {
+                    children: const {
                       0: Text(
                         'In The Office',
                         style: TextStyle(fontSize: 14),
@@ -135,7 +131,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                     },
                     onValueChanged: (val) {
                       setState(() {
-                        groupValue = val as int;
+                        groupValue = val;
                         if (val == 1) {
                           userLoc = true;
                         } else {
@@ -145,7 +141,11 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                     },
                   ),
                 ),
+                const SizedBox(
+                  height: 10,
+                ),
                 Card(
+                  elevation: 5.0,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         vertical: 10, horizontal: 10),
@@ -154,7 +154,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Take a photo!'),
+                            const Text('Take a photo!'),
                             Switch(
                                 value: takePhoto,
                                 onChanged: (v) {
@@ -213,6 +213,9 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                     ),
                   ),
                 ),
+                const SizedBox(
+                  height: 10,
+                ),
                 if (groupValue == 1)
                   Column(
                     children: [
@@ -236,21 +239,21 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                         ],
                       ),
                       DropdownButtonFormField(
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: 'Example : Work From Home',
-                          border: const OutlineInputBorder(
+                          border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.black),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
-                              color: '#3DC0F0'.toColor(),
+                              color: Colors.black,
                             ),
                           ),
                         ),
                         items: purposeList.map((element) {
                           return DropdownMenuItem(
-                            child: Text(element['name']),
                             value: element['value'],
+                            child: Text(element['name']),
                           );
                         }).toList(),
                         onChanged: (value) {
@@ -313,20 +316,13 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                   margin: const EdgeInsets.only(top: 5),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                        colors: ['#3d8ff0'.toColor(), '#3d8ff0'.toColor()],
+                        colors: ['#3DC0F0'.toColor(), '#3D8FF0'.toColor()],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        stops: [0.5, 0.8]),
-                    borderRadius: new BorderRadius.circular(8.0),
+                        stops: const [0.5, 0.8]),
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: ElevatedButton(
-                    child: Text(
-                      'Submit',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
                     onPressed: isButtonActive
                         ? () {
                             submitData(context);
@@ -337,8 +333,16 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       // backgroundColor: Colors.transparent,
                       // shadowColor: Colors.transparent,
-                      shape: new RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(8.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    child: const Text(
+                      'Submit',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
                     ),
                   ),

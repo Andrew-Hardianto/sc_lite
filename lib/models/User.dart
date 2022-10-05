@@ -26,7 +26,7 @@ class User {
   final String? packageName;
   final String? positionName;
   final String? profilePicture;
-  final String? shiftInDateTime;
+  final int? shiftInDateTime;
   final String? timezone;
 
   User({

@@ -319,8 +319,7 @@ class MainService {
   }
 
   getGlobalKey(String param, Function callback, BuildContext context) async {
-    var url =
-        '${await urlApi()}/api/v1/lookup/globalkey?active=true&name=$param';
+    var url = '${await urlApi()}/api/lookup/global-key?name=$param';
 
     getUrlHttp(url, false, (dynamic res) {
       if (res.statusCode != 200) {
@@ -469,10 +468,10 @@ class MainService {
       maskType: EasyLoadingMaskType.clear,
     );
 
-    // var url = Uri.parse(
-    //     'https://keycloak-dev.gitsolutions.id/auth/realms/GIT/protocol/openid-connect/token');
     var url = Uri.parse(
-        'https://keycloak.starconnect.id/auth/realms/GIT/protocol/openid-connect/token');
+        'https://keycloak-dev.gitsolutions.id/auth/realms/GIT/protocol/openid-connect/token');
+    // var url = Uri.parse(
+    //     'https://keycloak.starconnect.id/auth/realms/GIT/protocol/openid-connect/token');
 
     var res = await http
         .post(
@@ -589,5 +588,16 @@ class MainService {
     } catch (e) {
       return 'error';
     }
+  }
+
+  getLookUpX(String api, Function callback) async {
+    String url = "${await urlApi()}/api/lookup/$api";
+    getUrlHttp(url, false, (dynamic res) {
+      if (res.statusCode == 200) {
+        callback(res);
+      } else {
+        callback(res);
+      }
+    });
   }
 }

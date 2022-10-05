@@ -15,6 +15,8 @@ import 'package:sc_lite/views/screen/checkinout/checkinout_screen.dart';
 import 'package:sc_lite/views/screen/login/login_screen.dart';
 import 'dart:math' as math;
 import 'package:badges/badges.dart';
+import 'package:sc_lite/views/screen/self-service/shift-change/shift_change_screen.dart';
+import 'package:sc_lite/views/screen/self-service/time-off/time_off_screen.dart';
 import 'package:sc_lite/views/widget/pin/pin.dart';
 
 import 'package:sc_lite/views/widget/present-alert-expired/present_alert_expired.dart';
@@ -91,7 +93,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     isSkeletonLoadingMenuAccess = true;
     isSkeletonLoadingNewsFeed = true;
 
-    getMaintenance();
+    // getMaintenance();
+    getProfile();
     intervalLate = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (isCheckIn != null) {
         if (!isCheckIn!) {
@@ -137,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getProfile() async {
-    String url = '${await mainService.urlApi()}/api/v1/user/profile';
+    String url = '${await mainService.urlApi()}/api/user/profile';
 
     mainService.getUrlHttp(url, false, (res) async {
       if (res.statusCode == 200) {
@@ -210,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getQuotes() async {
-    String urlApi = '${await mainService.urlApi()}/api/v1/quote';
+    String urlApi = '${await mainService.urlApi()}/api/home/quote';
 
     mainService.getUrlHttp(urlApi, false, (res) {
       if (res.statusCode == 200) {
@@ -226,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   postMood(String mood) async {
-    String urlApi = '${await mainService.urlApi()}/api/v1/user/dailymood';
+    String urlApi = '${await mainService.urlApi()}/api/user/daily-mood';
 
     Map<String, dynamic> dataPost = {
       'mood': mood,
@@ -310,8 +313,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   checkLate() async {
     if (!isOffShift) {
       var time1 = today.millisecondsSinceEpoch;
-      var time2 = DateTime.parse(await shiftDateTime ?? today.toString())
-          .millisecondsSinceEpoch;
+      var time2 = shiftDateTime;
 
       if (time1 <= time2) {
         isLate = false;
@@ -331,11 +333,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getNewsFeed() async {
-    String url = '${await mainService.urlApi()}/api/v1/newsfeed?active=true';
+    String url = '${await mainService.urlApi()}/api/home/news-feed';
 
     mainService.getUrlHttp(url, false, (res) {
       if (res.statusCode == 200) {
-        List content = jsonDecode(res.body)['content'];
+        List content = jsonDecode(res.body)['data'];
         if (content.isNotEmpty) {
           // for (var data in content) {
           //   mainService.getImage(data['imagePath']).then((value) {
@@ -372,29 +374,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
-  getMaintenance() async {
-    String urlApi = '${await mainService.urlApi()}/api/v1/maintenance/alert';
-
-    await mainService.getUrlHttp(urlApi, true, (dynamic res) {
-      if (res.statusCode == 200) {
-        mainService.hideLoading();
-        var data = jsonDecode(res.body);
-
-        setState(() {
-          maintenanceAlertText = data['announcement'];
-          maintenanceAlertShow = data['maintenanceAlertShow'];
-        });
-        getProfile();
-      } else {
-        mainService.hideLoading();
-        mainService.errorHandlingHttp(res, context);
-      }
-    });
-  }
-
   checkExpired() async {
     String urlApi =
-        '${await mainService.urlApi()}/api/v1/user/subscription/alert-expired';
+        '${await mainService.urlApi()}/api/subscription/alert-expired';
 
     await mainService.getUrlHttp(urlApi, false, (dynamic res) {
       if (res.statusCode == 200) {
@@ -417,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   postUniqueId(dynamic uuid, String firebaseToken) async {
     String url = await mainService.urlApi();
-    var urlApi = "$url/api/v1/user/sys/notificationtoken";
+    var urlApi = "$url/api/user/notification/token";
 
     Map<String, dynamic> payload = {
       'deviceId': uuid,
@@ -447,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   getCountApproval() async {
     String urlApi =
-        '${await mainService.urlApi()}/api/user/dataapproval/countneedapproval/allmodule';
+        '${await mainService.urlApi()}/api/user/self-service/data-approval/count-need-approval';
 
     mainService.getUrlHttp(urlApi, false, (dynamic res) {
       if (res.statusCode == 200) {
@@ -518,7 +500,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getSPTPeriod() async {
-    String urlApi = '${await mainService.urlApi()}/api/user/payruntax/taxyear';
+    String urlApi =
+        '${await mainService.urlApi()}/api/admin/payroll/run-tax-request/tax-year';
 
     mainService.getUrlHttp(urlApi, false, (dynamic res) {
       if (res.statusCode == 200) {
@@ -569,6 +552,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     mainService.deleteStorage('G!T@VTR');
     mainService.deleteStorage('ACT@KN2');
     mainService.deleteStorage('P@CKGN!');
+    dispose();
     Future.delayed(const Duration(milliseconds: 1000)).then((value) =>
         Navigator.of(context).pushReplacementNamed(LoginScreen.routeName));
   }
@@ -1055,7 +1039,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         if (!isSkeletonLoading &&
                                             !isLate &&
                                             minuteDiff <= 15 &&
-                                            !isCheckIn!)
+                                            isCheckIn != null)
                                           Container(
                                             width: dailyMood ? 290 : 160,
                                             constraints: const BoxConstraints(
@@ -1089,7 +1073,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                             ),
                                           ),
                                         if ((!isSkeletonLoading &&
-                                                isCheckIn!) ||
+                                                isCheckIn != null) ||
                                             (!isSkeletonLoading &&
                                                 minuteDiff == 0 &&
                                                 isLate) ||
@@ -1113,7 +1097,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                             ),
                                           ),
                                         if ((!isSkeletonLoading &&
-                                                isCheckIn!) ||
+                                                isCheckIn != null) ||
                                             (!isSkeletonLoading &&
                                                 minuteDiff == 0 &&
                                                 isLate) ||
@@ -1387,7 +1371,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Column(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .pushNamed(ShiftChangeScreen.routeName);
+                                  },
                                   child: SvgPicture.asset(
                                     'assets/icon/home/shift-change.svg',
                                     width: 54,
@@ -1408,7 +1395,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Column(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .pushNamed(TimeOffScreen.routeName);
+                                  },
                                   child: SvgPicture.asset(
                                     'assets/icon/home/time-off.svg',
                                     width: 54,

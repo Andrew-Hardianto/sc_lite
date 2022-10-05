@@ -3,18 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:sc_lite/models/map.dart';
 
 class MapScreen extends StatefulWidget {
-  final OfficeLocation initialLocation;
-
   const MapScreen({
     Key? key,
-    this.initialLocation = const OfficeLocation(
-      officeLatitude: -6.2793,
-      officeLongitude: 107.0054,
-      toleranceInMeter: 100,
-    ),
   }) : super(key: key);
 
   @override
@@ -23,11 +15,32 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late final GoogleMapController _mapCtrl;
+  Completer<GoogleMapController> _controller = Completer();
   Location location = Location();
-  final Set<Marker> newMarker = new Set();
+  final Set<Marker> newMarker = {};
 
-  getLocation(GoogleMapController _cntlr) async {
-    _mapCtrl = _cntlr;
+  double officeLatitude = -6.2793;
+  double officeLongitude = 107.0054;
+  double toleranceInMeter = 100;
+
+  late LocationData currentLocation;
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentLocation();
+  }
+
+  @override
+  void dispose() {
+    _mapCtrl.dispose();
+    newMarker.clear();
+    super.dispose();
+  }
+
+  getLocation(GoogleMapController controller) async {
+    _mapCtrl = controller;
+
     try {
       location.onLocationChanged.listen((LocationData currentLocation) {
         _mapCtrl.animateCamera(
@@ -38,47 +51,107 @@ class _MapScreenState extends State<MapScreen> {
                 zoom: 15),
           ),
         );
-
-        setState(() {
-          newMarker.add(Marker(
-            markerId: const MarkerId('m1'),
-            position:
-                LatLng(currentLocation.latitude!, currentLocation.longitude!),
-          ));
-        });
+        if (mounted) {
+          setState(() {
+            newMarker.add(Marker(
+              markerId: const MarkerId('m1'),
+              position:
+                  LatLng(currentLocation.latitude!, currentLocation.longitude!),
+            ));
+          });
+        }
       });
     } catch (err) {
       print('PlatformException $err');
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
+  getCurrentLocation() {
+    location.onLocationChanged.listen((LocationData loc) {
+      currentLocation = location as LocationData;
+      if (mounted) {
+        setState(() {
+          newMarker.add(Marker(
+            markerId: const MarkerId('m1'),
+            position: LatLng(loc.latitude!, loc.longitude!),
+          ));
+        });
+      }
+    });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _mapCtrl.dispose();
+  void updatePinOnMap() async {
+    CameraPosition cPosition = CameraPosition(
+      zoom: 18,
+      target: LatLng(currentLocation.latitude!, currentLocation.longitude!),
+    );
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(cPosition));
+
+    setState(() {
+      // updated position
+      var pinPosition =
+          LatLng(currentLocation.latitude!, currentLocation.longitude!);
+
+      newMarker.removeWhere((m) => m.markerId.value == 'sourcePin');
+      newMarker.add(
+        Marker(
+          markerId: MarkerId('sourcePin'),
+
+          position: pinPosition, // updated position
+          // icon: sourceIcon,
+        ),
+      );
+    });
+  }
+
+  showPinsOnMap() {
+    var pinPosition =
+        LatLng(currentLocation.latitude!, currentLocation.longitude!);
+
+    // add the initial source location pin
+    newMarker.add(
+      Marker(
+        markerId: MarkerId('sourcePin'),
+        position: pinPosition,
+        onTap: () {},
+        // icon: sourceIcon,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    CameraPosition initialCameraPosition = CameraPosition(
+      target: LatLng(
+        currentLocation.latitude != null
+            ? currentLocation.latitude!
+            : officeLatitude,
+        currentLocation.longitude != null
+            ? currentLocation.longitude!
+            : officeLongitude,
+      ),
+      zoom: 16,
+    );
+
     return ClipRRect(
       borderRadius: const BorderRadius.all(
         Radius.circular(10),
       ),
       child: GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: LatLng(
-            widget.initialLocation.officeLatitude,
-            widget.initialLocation.officeLongitude,
-          ),
-          zoom: 16,
-        ),
+        initialCameraPosition: initialCameraPosition,
+        // CameraPosition(
+        //   target: LatLng(
+        //     officeLatitude,
+        //     officeLongitude,
+        //   ),
+        //   zoom: 16,
+        // ),
         markers: newMarker,
-        onMapCreated: getLocation,
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+          showPinsOnMap();
+        },
       ),
     );
   }
