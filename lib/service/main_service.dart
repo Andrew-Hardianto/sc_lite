@@ -323,9 +323,10 @@ class MainService {
 
     getUrlHttp(url, false, (dynamic res) {
       if (res.statusCode != 200) {
+        callback(null);
         errorHandlingHttp(res, context);
       } else {
-        callback(res);
+        callback(res.body);
       }
     });
   }
@@ -411,7 +412,7 @@ class MainService {
       'Authorization': 'Bearer ${await getAccessToken()}',
       "content-type": "application/json"
     };
-
+    print(headers);
     var res = await http
         .post(Uri.parse(urlApi), headers: headers, body: jsonEncode(formData))
         .timeout(Duration(milliseconds: timeoutms));

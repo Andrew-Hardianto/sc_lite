@@ -15,7 +15,11 @@ import 'package:sc_lite/views/screen/checkinout/checkinout_screen.dart';
 import 'package:sc_lite/views/screen/login/login_screen.dart';
 import 'dart:math' as math;
 import 'package:badges/badges.dart';
+import 'package:sc_lite/views/screen/self-service/leave/leave_screen.dart';
+import 'package:sc_lite/views/screen/self-service/overtime/overtime_screen.dart';
+import 'package:sc_lite/views/screen/self-service/permission/permission_screen.dart';
 import 'package:sc_lite/views/screen/self-service/shift-change/shift_change_screen.dart';
+import 'package:sc_lite/views/screen/self-service/sick/sick_screen.dart';
 import 'package:sc_lite/views/screen/self-service/time-off/time_off_screen.dart';
 import 'package:sc_lite/views/widget/pin/pin.dart';
 
@@ -289,24 +293,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Future checkValidation() async {
     await mainService.getGlobalKey('PAY_PROPERTIES', (res) {
-      var data = jsonDecode(res.body);
-      var payslip = data
-          .where((dynamic data) => data['name'] == "ENABLE_PAYSLIP_ACCESS")
-          .toList();
-      var spt = data
-          .where((dynamic data) => data['name'] == "ENABLE_1721A1_ACCESS")
-          .toList();
+      if (res != null) {
+        var data = jsonDecode(res);
+        var payslip = data
+            .where((dynamic data) => data['name'] == "ENABLE_PAYSLIP_ACCESS")
+            .toList();
+        var spt = data
+            .where((dynamic data) => data['name'] == "ENABLE_1721A1_ACCESS")
+            .toList();
 
-      setState(() {
-        isPayslip = payslip[0]['value'] == 'Y' ? true : false;
-        isSpt = spt[0]['value'] == 'Y' ? true : false;
-      });
-
-      Future.delayed(const Duration(milliseconds: 1000)).then((value) {
         setState(() {
-          isSkeletonLoadingQuickAccess = false;
+          isPayslip = payslip[0]['value'] == 'Y' ? true : false;
+          isSpt = spt[0]['value'] == 'Y' ? true : false;
         });
-      });
+
+        Future.delayed(const Duration(milliseconds: 1000)).then((value) {
+          setState(() {
+            isSkeletonLoadingQuickAccess = false;
+          });
+        });
+      }
     }, context);
   }
 
@@ -1264,7 +1270,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Column(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .pushNamed(LeaveScreen.routeName);
+                                  },
                                   child: SvgPicture.asset(
                                     'assets/icon/home/leave.svg',
                                     width: 54,
@@ -1285,7 +1294,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Column(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .pushNamed(PermissionScreen.routeName);
+                                  },
                                   child: SvgPicture.asset(
                                     'assets/icon/home/permission.svg',
                                     width: 54,
@@ -1306,7 +1318,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Column(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .pushNamed(SickScreen.routeName);
+                                  },
                                   child: SvgPicture.asset(
                                     'assets/icon/home/sick.svg',
                                     width: 54,
@@ -1350,7 +1365,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Column(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .pushNamed(OvertimeScreen.routeName);
+                                  },
                                   child: SvgPicture.asset(
                                     'assets/icon/home/overtime.svg',
                                     width: 54,

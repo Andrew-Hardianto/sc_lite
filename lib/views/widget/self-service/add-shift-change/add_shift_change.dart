@@ -33,21 +33,21 @@ class _AddShiftChangeState extends State<AddShiftChange> {
     super.initState();
     getShift(context);
     if (widget.action == 'edit') {
-      this.shiftStartDate = widget.data!['shiftStartDate'];
-      this.shiftEndDate = widget.data!['shiftEndDate'];
-      this.startDate.text =
+      shiftStartDate = widget.data!['shiftStartDate'];
+      shiftEndDate = widget.data!['shiftEndDate'];
+      startDate.text =
           DateFormat('dd MMM yyyy').format(widget.data!['shiftStartDate']);
-      this.endDate.text =
+      endDate.text =
           DateFormat('dd MMM yyyy').format(widget.data!['shiftEndDate']);
-      this.selectedItem = widget.data!['shiftId'];
-      this.selectedName = widget.data!['shiftName'];
+      selectedItem = widget.data!['shiftId'];
+      selectedName = widget.data!['shiftName'];
     }
   }
 
   selectedDate(String type) async {
     DatePicker.showDatePicker(
       context,
-      theme: DatePickerTheme(
+      theme: const DatePickerTheme(
         containerHeight: 250.0,
       ),
       minTime: type == 'end' ? shiftStartDate : DateTime(2000),
@@ -100,13 +100,12 @@ class _AddShiftChangeState extends State<AddShiftChange> {
       'shiftName': selectedName,
     };
     return Navigator.of(context).pop(data);
-    // return data;
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: Container(
+      child: SizedBox(
         width: 300,
         height: MediaQuery.of(context).size.height - 320,
         child: Column(
@@ -115,7 +114,7 @@ class _AddShiftChangeState extends State<AddShiftChange> {
             Container(
               height: 50,
               width: double.infinity,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
                     color: Colors.grey,
@@ -133,7 +132,7 @@ class _AddShiftChangeState extends State<AddShiftChange> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               width: double.infinity,
-              child: Text(
+              child: const Text(
                 'Your requested date(s) is..',
                 textAlign: TextAlign.start,
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
@@ -147,19 +146,19 @@ class _AddShiftChangeState extends State<AddShiftChange> {
                 children: [
                   Container(
                     width: 130,
-                    child: Text(
+                    child: const Text(
                       'From',
                       textAlign: TextAlign.start,
                       style:
                           TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 20,
                   ),
                   Container(
                     width: 130,
-                    child: Text(
+                    child: const Text(
                       'To',
                       textAlign: TextAlign.start,
                       style:
@@ -185,7 +184,7 @@ class _AddShiftChangeState extends State<AddShiftChange> {
                   ),
                   Container(
                     width: 20,
-                    child: Center(
+                    child: const Center(
                       child: Text(
                         '-',
                         style: TextStyle(
@@ -207,7 +206,7 @@ class _AddShiftChangeState extends State<AddShiftChange> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               width: double.infinity,
-              child: Text(
+              child: const Text(
                 'Choose your new shift for selected date(s)',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
@@ -217,7 +216,7 @@ class _AddShiftChangeState extends State<AddShiftChange> {
               width: double.infinity,
               height: 70,
               child: DropdownButtonFormField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   hintText: 'Select Shift',
@@ -255,7 +254,7 @@ class _AddShiftChangeState extends State<AddShiftChange> {
                           Navigator.of(context).pop();
                           // return null;
                         },
-                        child: Text('CANCEL'),
+                        child: const Text('CANCEL'),
                         style: ElevatedButton.styleFrom(
                           primary: Colors.red,
                         )),

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -72,7 +71,7 @@ class _ShiftChangeScreenState extends State<ShiftChangeScreen> {
   }
 
   Future submitData() async {
-    shiftList.forEach((element) {
+    for (var element in shiftList) {
       finalShiftList.add({
         'scheduleDateFrom':
             DateFormat('yyyy-MM-dd').format(element['shiftStartDate']),
@@ -80,14 +79,15 @@ class _ShiftChangeScreenState extends State<ShiftChangeScreen> {
             DateFormat('yyyy-MM-dd').format(element['shiftEndDate']),
         'shiftId': element['shiftId'],
       });
-    });
+    }
 
     Map<String, dynamic> payload = {
       'remark': remark.text,
       'details': finalShiftList
     };
-    // print(payload);
-    var url = await mainService.urlApi() + '/api/v1/user/tm/changeshift';
+
+    var url =
+        await mainService.urlApi() + '/api/user/self-service/shift-change';
 
     mainService.postUrlApi(url, true, payload, (res) {
       if (res.statusCode == 200) {
@@ -151,7 +151,7 @@ class _ShiftChangeScreenState extends State<ShiftChangeScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      focusedBorder: OutlineInputBorder(
+                      focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Colors.grey,
                         ),
