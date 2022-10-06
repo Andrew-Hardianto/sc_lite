@@ -90,6 +90,8 @@ flutter:
     - assets/icon/
     - assets/icon/home/
     - assets/icon/tutorial/
+    - assets/icon/absence/
+    - assets/icon/general/
     - assets/icon/home/menu/
     - assets/icon/logo/png/
 

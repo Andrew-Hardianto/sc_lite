@@ -755,7 +755,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         InkWell(
                           key: _key2,
                           borderRadius: BorderRadius.circular(50),
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.of(context)
+                                .pushNamed(LeaveScreen.routeName);
+                          },
                           child: const Icon(
                             Icons.notifications_outlined,
                             size: 43.0,
