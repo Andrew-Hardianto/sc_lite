@@ -61,6 +61,7 @@ dependencies:
   google_maps_flutter: ^2.2.1
   flutter_slidable: ^2.0.0
   flutter_datetime_picker_bdaya: ^2.0.0
+  url_launcher: ^6.1.6
 
 dev_dependencies:
   flutter_test:
@@ -86,12 +87,18 @@ flutter:
     - assets/image/
     - assets/image/login/
     - assets/image/home/
+    - assets/image/status/    
+    - assets/image/approval/    
+    - assets/image/profile/
     - assets/image/get-started/
     - assets/icon/
     - assets/icon/home/
+    - assets/icon/status/
+    - assets/icon/approval/
     - assets/icon/tutorial/
     - assets/icon/absence/
     - assets/icon/general/
+    - assets/icon/self-service/payslip/
     - assets/icon/home/menu/
     - assets/icon/logo/png/
 

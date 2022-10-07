@@ -17,6 +17,8 @@ import 'dart:math' as math;
 import 'package:badges/badges.dart';
 import 'package:sc_lite/views/screen/self-service/leave/leave_screen.dart';
 import 'package:sc_lite/views/screen/self-service/overtime/overtime_screen.dart';
+import 'package:sc_lite/views/screen/self-service/payslip/payslip-detail/payslip_detail.dart';
+import 'package:sc_lite/views/screen/self-service/payslip/payslip_screen.dart';
 import 'package:sc_lite/views/screen/self-service/permission/permission_screen.dart';
 import 'package:sc_lite/views/screen/self-service/shift-change/shift_change_screen.dart';
 import 'package:sc_lite/views/screen/self-service/sick/sick_screen.dart';
@@ -24,6 +26,7 @@ import 'package:sc_lite/views/screen/self-service/time-off/time_off_screen.dart'
 import 'package:sc_lite/views/widget/pin/pin.dart';
 
 import 'package:sc_lite/views/widget/present-alert-expired/present_alert_expired.dart';
+import 'package:sc_lite/views/widget/self-service/spt1721/spt.dart';
 import 'package:sc_lite/views/widget/snackbar/snackbar_message.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
@@ -521,16 +524,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           openSPT1721(optPeriod);
         }
       } else {
+        openSPT1721('errr');
         mainService.errorHandlingHttp(res, context);
       }
     });
   }
 
-  openPin(String action) {
+  openPin(String type) {
     return showGeneralDialog(
       context: context,
       pageBuilder: (context, animation, secondaryAnimation) => PinScreen(
-        action: action,
+        type: type,
+      ),
+      transitionBuilder: (ctx, a1, a2, child) {
+        var curve = Curves.easeInOut.transform(a1.value);
+        return Transform.scale(
+          scale: curve,
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    ).then((dynamic value) {
+      // print({'pin', value});
+      if (value != null) {
+        if (value['type'] == 'payslip') {
+          Future.delayed(const Duration(milliseconds: 1000)).then((value) =>
+              Navigator.of(context).pushNamed(PayslipScreen.routeName));
+        } else if (value['type'] == 'spt') {
+          getSPTPeriod();
+        }
+      }
+    });
+  }
+
+  goToCheckinout(String page) {
+    Navigator.of(context)
+        .pushNamed(CheckinoutScreen.routeName, arguments: {'type': page});
+  }
+
+  openNews(dynamic data) {}
+
+  openSPT1721(dynamic optPeriod) async {
+    return showGeneralDialog(
+      context: context,
+      pageBuilder: (context, animation, secondaryAnimation) => SptModal(
+        optPeriod: optPeriod,
       ),
       transitionBuilder: (ctx, a1, a2, child) {
         var curve = Curves.easeInOut.transform(a1.value);
@@ -542,15 +580,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       transitionDuration: const Duration(milliseconds: 300),
     );
   }
-
-  goToCheckinout(String page) {
-    Navigator.of(context)
-        .pushNamed(CheckinoutScreen.routeName, arguments: {'type': page});
-  }
-
-  openNews(dynamic data) {}
-
-  openSPT1721(dynamic optPeriod) async {}
 
   logout() {
     mainService.deleteStorage('SPS!#WU');
@@ -1636,7 +1665,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ),
                                 if (mainService.countApproval == 0)
                                   InkWell(
-                                    onTap: () {},
+                                    onTap: () {
+                                      Navigator.of(context).pushNamed(e['url']);
+                                    },
                                     child: SvgPicture.asset(
                                       e['icon'],
                                       width: 54,

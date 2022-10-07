@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:sc_lite/views/screen/approval/approval_screen.dart';
 import 'package:sc_lite/views/screen/checkinout/checkinout_screen.dart';
 import 'package:sc_lite/views/screen/get-started/get_started_screen.dart';
 import 'package:sc_lite/views/screen/home/home_screen.dart';
 import 'package:sc_lite/views/screen/login/login_screen.dart';
 import 'package:sc_lite/views/screen/self-service/leave/leave_screen.dart';
 import 'package:sc_lite/views/screen/self-service/overtime/overtime_screen.dart';
+import 'package:sc_lite/views/screen/self-service/payslip/payslip-detail/payslip_detail.dart';
 import 'package:sc_lite/views/screen/self-service/payslip/payslip_screen.dart';
 import 'package:sc_lite/views/screen/self-service/permission/permission_screen.dart';
 import 'package:sc_lite/views/screen/self-service/shift-change/shift_change_screen.dart';
 import 'package:sc_lite/views/screen/self-service/sick/sick_screen.dart';
 import 'package:sc_lite/views/screen/self-service/time-off/time_off_screen.dart';
+import 'package:sc_lite/views/screen/status/status_screen.dart';
 
 Route<dynamic> generateRoute(RouteSettings routeSettings) {
   switch (routeSettings.name) {
@@ -27,6 +30,16 @@ Route<dynamic> generateRoute(RouteSettings routeSettings) {
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (_) => const GetStartedScreen(),
+      );
+    case ApprovalScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => const ApprovalScreen(),
+      );
+    case StatusScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => const StatusScreen(),
       );
     case CheckinoutScreen.routeName:
       return MaterialPageRoute(
@@ -47,6 +60,11 @@ Route<dynamic> generateRoute(RouteSettings routeSettings) {
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (_) => const PayslipScreen(),
+      );
+    case PayslipDetailScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => const PayslipDetailScreen(),
       );
     case OvertimeScreen.routeName:
       return MaterialPageRoute(
