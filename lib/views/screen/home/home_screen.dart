@@ -147,7 +147,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getProfile() async {
+    // micro
     String url = '${await mainService.urlApi()}/api/user/profile';
+    // mono
+    // String url = '${await mainService.urlApi()}/api/v1/user/profile';
 
     mainService.getUrlHttp(url, false, (res) async {
       if (res.statusCode == 200) {
@@ -220,7 +223,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getQuotes() async {
+    // micro
     String urlApi = '${await mainService.urlApi()}/api/home/quote';
+    // mono
+    // String urlApi = '${await mainService.urlApi()}/api/v1/quote';
 
     mainService.getUrlHttp(urlApi, false, (res) {
       if (res.statusCode == 200) {
@@ -236,7 +242,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   postMood(String mood) async {
+    // micro
     String urlApi = '${await mainService.urlApi()}/api/user/daily-mood';
+    // mono
+    // String urlApi = '${await mainService.urlApi()}/api/v1/user/dailymood';
 
     Map<String, dynamic> dataPost = {
       'mood': mood,
@@ -342,7 +351,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getNewsFeed() async {
+    // micro
     String url = '${await mainService.urlApi()}/api/home/news-feed';
+    // mono
+    // String url = '${await mainService.urlApi()}/api/v1/newsfeed?active=true';
 
     mainService.getUrlHttp(url, false, (res) {
       if (res.statusCode == 200) {
@@ -384,8 +396,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   checkExpired() async {
+    // micro
     String urlApi =
         '${await mainService.urlApi()}/api/subscription/alert-expired';
+    // mono
+    // String urlApi =
+    // '${await mainService.urlApi()}/api/v1/user/subscription/alert-expired';
 
     await mainService.getUrlHttp(urlApi, false, (dynamic res) {
       if (res.statusCode == 200) {
@@ -407,8 +423,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   postUniqueId(dynamic uuid, String firebaseToken) async {
-    String url = await mainService.urlApi();
-    var urlApi = "$url/api/user/notification/token";
+    // micro
+    String urlApi = "${await mainService.urlApi()}/api/user/notification/token";
+    // mono
+    // String urlApi = "${await mainService.urlApi()}/api/v1/user/sys/notificationtoken";
 
     Map<String, dynamic> payload = {
       'deviceId': uuid,
@@ -437,8 +455,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getCountApproval() async {
+    // micro
     String urlApi =
         '${await mainService.urlApi()}/api/user/self-service/data-approval/count-need-approval';
+    // mono
+    // String urlApi =
+    //     '${await mainService.urlApi()}/api/user/dataapproval/countneedapproval/allmodule';
 
     mainService.getUrlHttp(urlApi, false, (dynamic res) {
       if (res.statusCode == 200) {
@@ -509,8 +531,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getSPTPeriod() async {
+    // micro
     String urlApi =
         '${await mainService.urlApi()}/api/admin/payroll/run-tax-request/tax-year';
+    // mono
+    // String urlApi =
+    //     '${await mainService.urlApi()}/api/user/payruntax/taxyear';
 
     mainService.getUrlHttp(urlApi, false, (dynamic res) {
       if (res.statusCode == 200) {

@@ -323,7 +323,10 @@ class MainService {
   }
 
   getGlobalKey(String param, Function callback, BuildContext context) async {
+    // micro
     var url = '${await urlApi()}/api/lookup/global-key?name=$param';
+    // mono
+    // var url = '${await urlApi()}/api/v1/lookup/globalkey?active=true&name=$param';
 
     getUrlHttp(url, false, (dynamic res) {
       if (res.statusCode != 200) {
@@ -596,7 +599,10 @@ class MainService {
   }
 
   getLookUpX(String api, Function callback) async {
+    // micro
     String url = "${await urlApi()}/api/lookup/$api";
+    // mono
+    // String url = "${await urlApi()}/api/v1/lookup/$api";
     getUrlHttp(url, false, (dynamic res) {
       if (res.statusCode == 200) {
         callback(res);
