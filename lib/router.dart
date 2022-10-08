@@ -13,6 +13,7 @@ import 'package:sc_lite/views/screen/self-service/shift-change/shift_change_scre
 import 'package:sc_lite/views/screen/self-service/sick/sick_screen.dart';
 import 'package:sc_lite/views/screen/self-service/time-off/time_off_screen.dart';
 import 'package:sc_lite/views/screen/status/status_screen.dart';
+import 'package:sc_lite/views/screen/transaction/checkinout/checkinout_list_screen.dart';
 
 Route<dynamic> generateRoute(RouteSettings routeSettings) {
   switch (routeSettings.name) {
@@ -85,6 +86,11 @@ Route<dynamic> generateRoute(RouteSettings routeSettings) {
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (_) => const PermissionScreen(),
+      );
+    case CheckinoutListScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => const CheckinoutListScreen(),
       );
     default:
       return MaterialPageRoute(

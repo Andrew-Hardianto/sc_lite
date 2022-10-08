@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sc_lite/views/screen/transaction/checkinout/checkinout_list_screen.dart';
 import 'package:sc_lite/views/widget/text-appbar/text_appbar.dart';
 
 class StatusScreen extends StatefulWidget {
@@ -33,7 +34,7 @@ class _StatusScreenState extends State<StatusScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
+                      const Text(
                         'Absence',
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
@@ -124,7 +125,7 @@ class _StatusScreenState extends State<StatusScreen> {
                       const SizedBox(
                         height: 10,
                       ),
-                      Text(
+                      const Text(
                         'Time',
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
@@ -141,8 +142,10 @@ class _StatusScreenState extends State<StatusScreen> {
                               children: [
                                 InkWell(
                                   onTap: () {
-                                    // Navigator.of(context)
-                                    //     .pushNamed(TimeOffScreen.routeName);
+                                    Navigator.of(context).pushNamed(
+                                      CheckinoutListScreen.routeName,
+                                      arguments: {'type': 'Status'},
+                                    );
                                   },
                                   child: SvgPicture.asset(
                                     'assets/icon/status/checkinout-status.svg',
