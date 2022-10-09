@@ -38,8 +38,11 @@ class _PayslipDetailScreenState extends State<PayslipDetailScreen> {
   }
 
   getDetail() async {
+    // micro
     String urlApi =
         "${await mainService.urlApi()}/api/user/self-service/payslip/detail?period=${data['period']}&runtypeid=${data['id']}";
+    // mono
+    "${await mainService.urlApi()}/api/user/payslip/detail?period=${data['period']}&runtypeid=${data['id']}";
 
     mainService.getUrlHttp(urlApi, true, (dynamic res) {
       if (res.statusCode == 200) {

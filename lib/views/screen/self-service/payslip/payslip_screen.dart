@@ -34,8 +34,11 @@ class _PayslipScreenState extends State<PayslipScreen> {
   }
 
   getListPayslip() async {
+    // micro
     String urlApi =
         "${await mainService.urlApi()}/api/user/self-service/payslip";
+    // mono
+    // "${await mainService.urlApi()}/api/user/payslip";
 
     mainService.getUrlHttp(urlApi, true, (dynamic res) {
       if (res.statusCode == 200) {

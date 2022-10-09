@@ -60,8 +60,11 @@ class _PermissionScreenState extends State<PermissionScreen> {
   String? selectedName;
 
   getAbsenceType(String absenceType) async {
+    // micro
     String url =
         "${await mainService.urlApi()}/api/lookup/mobile/tm/absence/category?name=$absenceType";
+    // mono
+    // "${await mainService.urlApi()}/api/v1/user/tm/absence/category?name=$absenceType";
 
     mainService.getUrlHttp(url, true, (res) {
       if (res.statusCode == 200) {
