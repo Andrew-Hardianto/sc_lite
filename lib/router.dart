@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sc_lite/views/screen/approval/approval_screen.dart';
-import 'package:sc_lite/views/screen/checkinout/checkinout_screen.dart';
 import 'package:sc_lite/views/screen/get-started/get_started_screen.dart';
 import 'package:sc_lite/views/screen/home/home_screen.dart';
 import 'package:sc_lite/views/screen/login/login_screen.dart';
+import 'package:sc_lite/views/screen/self-service/checkinout/checkinout_screen.dart';
 import 'package:sc_lite/views/screen/self-service/leave/leave_screen.dart';
 import 'package:sc_lite/views/screen/self-service/overtime/overtime_screen.dart';
 import 'package:sc_lite/views/screen/self-service/payslip/payslip-detail/payslip_detail.dart';
@@ -14,6 +14,7 @@ import 'package:sc_lite/views/screen/self-service/sick/sick_screen.dart';
 import 'package:sc_lite/views/screen/self-service/time-off/time_off_screen.dart';
 import 'package:sc_lite/views/screen/status/status_screen.dart';
 import 'package:sc_lite/views/screen/transaction/checkinout/checkinout_list_screen.dart';
+import 'package:sc_lite/views/screen/transaction/transaction-detail/checkinout-detail/checkinout_detail.dart';
 
 Route<dynamic> generateRoute(RouteSettings routeSettings) {
   switch (routeSettings.name) {
@@ -91,6 +92,11 @@ Route<dynamic> generateRoute(RouteSettings routeSettings) {
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (_) => const CheckinoutListScreen(),
+      );
+    case CheckinoutDetail.routeName:
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => const CheckinoutDetail(),
       );
     default:
       return MaterialPageRoute(

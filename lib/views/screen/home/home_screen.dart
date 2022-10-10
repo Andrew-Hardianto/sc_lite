@@ -11,10 +11,10 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:sc_lite/provider/user_provider.dart';
 import 'package:sc_lite/service/main_service.dart';
 import 'package:sc_lite/utils/extension.dart';
-import 'package:sc_lite/views/screen/checkinout/checkinout_screen.dart';
 import 'package:sc_lite/views/screen/login/login_screen.dart';
 import 'dart:math' as math;
 import 'package:badges/badges.dart';
+import 'package:sc_lite/views/screen/self-service/checkinout/checkinout_screen.dart';
 import 'package:sc_lite/views/screen/self-service/leave/leave_screen.dart';
 import 'package:sc_lite/views/screen/self-service/overtime/overtime_screen.dart';
 import 'package:sc_lite/views/screen/self-service/payslip/payslip-detail/payslip_detail.dart';
@@ -465,15 +465,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     mainService.getUrlHttp(urlApi, false, (dynamic res) {
       if (res.statusCode == 200) {
         var count = jsonDecode(res.body);
-
-        var absenceData =
-            count.where((dynamic data) => data['name'] == 'Absence');
-        var timeData = count.where((dynamic data) => data['name'] == 'Time');
-        var absence =
-            absenceData.length == 0 ? 0 : int.parse(absenceData[0].value);
-        var time = timeData.length == 0 ? 0 : int.parse(timeData[0].value);
+        print(count);
+        // var absenceData =
+        //     count.where((dynamic data) => data['name'] == 'Absence');
+        // var timeData = count.where((dynamic data) => data['name'] == 'Time');
+        // var absence =
+        //     absenceData.length == 0 ? 0 : int.parse(absenceData[0].value);
+        // var time = timeData.length == 0 ? 0 : int.parse(timeData[0].value);
         setState(() {
-          mainService.countApproval = absence + time;
+          // mainService.countApproval = absence + time;
           isSkeletonLoadingMenuAccess = false;
         });
       } else {

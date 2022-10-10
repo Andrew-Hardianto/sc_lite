@@ -129,7 +129,9 @@ class _PinScreenState extends State<PinScreen> {
 
       handleValidation('validation', data, (dynamic res) {
         if (res.statusCode == 200) {
-          Navigator.of(context).pop({'type': widget.type});
+          if (mounted) {
+            Navigator.of(context).pop({'type': widget.type});
+          }
         } else {
           // mainService.errorHandlingHttp(res, context);
           showSnackbarError(context, 'Invalid PIN!');

@@ -42,17 +42,19 @@ class _PayslipScreenState extends State<PayslipScreen> {
 
     mainService.getUrlHttp(urlApi, true, (dynamic res) {
       if (res.statusCode == 200) {
+        mainService.hideLoading();
         var data = jsonDecode(res.body);
         setState(() {
           listPayslip = data;
+          isSkeletonLoading = false;
         });
       } else {
+        mainService.hideLoading();
+        setState(() {
+          isSkeletonLoading = false;
+        });
         mainService.errorHandlingHttp(res, context);
       }
-      mainService.hideLoading();
-      setState(() {
-        isSkeletonLoading = false;
-      });
     });
   }
 
@@ -134,55 +136,56 @@ class _PayslipScreenState extends State<PayslipScreen> {
                 if (listPayslip.isNotEmpty && !isSkeletonLoading)
                   Column(
                     children: listPayslip.map((e) {
-                      return SizedBox(
+                      return Container(
                         height: 100,
                         width: double.infinity,
-                        child: Card(
-                          color: '#F3F3F3'.toColor(),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 10,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '$e["period"] - $e["runTypeName"]',
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                    Text(
-                                      NumberFormat.currency(locale: 'id')
-                                          .format(e["value"]),
-                                      style: const TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
+                        margin: const EdgeInsets.only(bottom: 10),
+                        child: InkWell(
+                          onTap: () {
+                            goToPayslipDetail(e['runTypeId'], e['period']);
+                          },
+                          child: Card(
+                            color: '#F3F3F3'.toColor(),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 10,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${e["period"]} - ${e["runTypeName"]}',
+                                        style: const TextStyle(fontSize: 14),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                if (e['upOrDownValue'] == 1)
-                                  InkWell(
-                                    onTap: () {
-                                      getListPayslip();
-                                    },
-                                    child: SvgPicture.asset(
+                                      Text(
+                                        NumberFormat.currency(
+                                          locale: 'id',
+                                          symbol: 'Rp ',
+                                          decimalDigits: 2,
+                                        ).format(e["value"]),
+                                        style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (e['upOrDownValue'] == 1)
+                                    SvgPicture.asset(
                                         'assets/icon/self-service/payslip/arrow-up-thick.svg'),
-                                  ),
-                                if (e['upOrDownValue'] == -1)
-                                  InkWell(
-                                    onTap: () {
-                                      getListPayslip();
-                                    },
-                                    child: SvgPicture.asset(
+                                  if (e['upOrDownValue'] == -1)
+                                    SvgPicture.asset(
                                         'assets/icon/self-service/payslip/arrow-down-thick.svg'),
-                                  ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),

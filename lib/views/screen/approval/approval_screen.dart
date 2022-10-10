@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sc_lite/service/main_service.dart';
 import 'package:sc_lite/views/screen/transaction/checkinout/checkinout_list_screen.dart';
 
 class ApprovalScreen extends StatefulWidget {
@@ -11,6 +14,92 @@ class ApprovalScreen extends StatefulWidget {
 }
 
 class _ApprovalScreenState extends State<ApprovalScreen> {
+  final mainService = MainService();
+
+  num totalCountPermission = 0;
+  num totalCountSick = 0;
+  num totalCountLeave = 0;
+  num totalCountOvertime = 0;
+  num totalCountCheckInOut = 0;
+  num totalCountShiftChange = 0;
+  num totalCountTimeOff = 0;
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCountApproval();
+  }
+
+  getCountApproval() async {
+    // micro
+    String urlApi =
+        '${await mainService.urlApi()}/api/user/self-service/data-approval/count-need-approval/all-module';
+    // mono
+    // String urlApi =
+    //     '${await mainService.urlApi()}/api/user/dataapproval/countneedapproval/allmodule';
+
+    mainService.getUrlHttp(urlApi, false, (dynamic res) {
+      if (res.statusCode == 200) {
+        var data = jsonDecode(res.body);
+
+        if (data.length != 0) {
+          var absence = data.filter((res) => res.name == "Absence");
+          if (absence.length != 0) {
+            absence[0].detail.forEach((count) {
+              if (count.name == "Leave") {
+                totalCountLeave = count.value;
+              }
+              if (count.name == "Permission") {
+                totalCountPermission = count.value;
+              }
+              if (count.name == "Sick") {
+                totalCountSick = count.value;
+              }
+            });
+          }
+          // end of set count absence
+
+          // set count time
+          var time = res.filter((res) => res.name == "Time");
+          if (time.length != 0) {
+            time[0].detail.forEach((count) {
+              if (count.name == "Check In / Out") {
+                totalCountCheckInOut = count.value;
+              }
+
+              // set count shift change
+              if (count.name == "Shift Change") {
+                totalCountShiftChange = count.value;
+              }
+              // end of set count shift change
+
+              // set count time off
+              if (count.name == "Time Off") {
+                totalCountTimeOff = count.value;
+              }
+              // end of set count time off
+            });
+          }
+          // end of set count time
+
+          // set count overtime
+          var overtime = res.filter((res) => res.name == "Overtime");
+          if (overtime.length != 0) {
+            totalCountOvertime = overtime[0].value;
+          }
+        }
+      } else {
+        mainService.errorHandlingHttp(res, context);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,6 +141,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+                margin: const EdgeInsets.only(top: 50),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

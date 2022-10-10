@@ -212,9 +212,8 @@ class MainService {
   getAuthoritiesToken() async {
     final profile = await storage.read(key: 'AU@HZS!');
     if (profile != null) {
-      final token = jsonDecode(profile)['authoritiesToken'];
-      final authToken = jwtDecode(token);
-      return authToken.payload['authorities'];
+      final token = jsonDecode(await decrypt(profile))['authoritiesToken'];
+      return token;
     } else {
       return null;
     }
@@ -393,6 +392,7 @@ class MainService {
     Map<String, String> headers = {
       'X-TenantID': '${await getTenantId()}',
       'Authorization': 'Bearer ${await getAccessToken()}',
+      "AuthorizationToken": '${await getAuthoritiesToken()}'
     };
 
     var res = await http.get(Uri.parse(url), headers: headers).timeout(

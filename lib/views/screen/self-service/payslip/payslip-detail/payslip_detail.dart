@@ -7,6 +7,7 @@ import 'package:sc_lite/service/main_service.dart';
 import 'package:sc_lite/utils/extension.dart';
 import 'package:sc_lite/views/widget/text-appbar/text_appbar.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PayslipDetailScreen extends StatefulWidget {
   static const String routeName = '/self-service/payslip/payslip-detail';
@@ -42,13 +43,13 @@ class _PayslipDetailScreenState extends State<PayslipDetailScreen> {
     String urlApi =
         "${await mainService.urlApi()}/api/user/self-service/payslip/detail?period=${data['period']}&runtypeid=${data['id']}";
     // mono
-    "${await mainService.urlApi()}/api/user/payslip/detail?period=${data['period']}&runtypeid=${data['id']}";
+    // "${await mainService.urlApi()}/api/user/payslip/detail?period=${data['period']}&runtypeid=${data['id']}";
 
     mainService.getUrlHttp(urlApi, true, (dynamic res) {
       if (res.statusCode == 200) {
         var data = jsonDecode(res.body);
         mainService.hideLoading();
-        print(data);
+
         setState(() {
           netSalary = data['jumlahDiterima'];
           totalIncome = data['gajiKotor'];
@@ -83,9 +84,20 @@ class _PayslipDetailScreenState extends State<PayslipDetailScreen> {
     });
   }
 
+  downloadPayslip() async {
+    String urlApi =
+        "${await mainService.urlApi()}/public/core-ws/payslip-report/payslip-result?runtypeid=$data['id']&period=$data['period']&token=$payslipToken";
+
+    // this.mainService.openInAppBrowser(urlApi);
+    launchUrl(
+      Uri.parse(urlApi),
+      mode: LaunchMode.inAppWebView,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    data = ModalRoute.of(context)!.settings.arguments;
+    data = ModalRoute.of(context)!.settings.arguments as Map;
 
     return Scaffold(
       appBar: AppBar(
@@ -126,6 +138,7 @@ class _PayslipDetailScreenState extends State<PayslipDetailScreen> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,7 +155,11 @@ class _PayslipDetailScreenState extends State<PayslipDetailScreen> {
                           ),
                           if (!isSkeletonLoading)
                             Text(
-                              'dwd',
+                              NumberFormat.currency(
+                                locale: 'id',
+                                symbol: 'Rp ',
+                                decimalDigits: 2,
+                              ).format(netSalary),
                               style: const TextStyle(
                                 fontSize: 18,
                                 color: Colors.white,
@@ -166,7 +183,9 @@ class _PayslipDetailScreenState extends State<PayslipDetailScreen> {
                       ),
                       IconButton(
                         color: Colors.white,
-                        onPressed: () {},
+                        onPressed: () {
+                          downloadPayslip();
+                        },
                         icon: const Icon(Icons.download_rounded),
                       ),
                     ],

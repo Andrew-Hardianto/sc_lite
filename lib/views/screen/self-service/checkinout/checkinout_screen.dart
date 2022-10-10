@@ -30,7 +30,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
 
   int groupValue = 0;
   bool userLoc = false;
-  Location _location = Location();
+  final Location location = Location();
 
   double lat = 0.0;
   double lng = 0.0;

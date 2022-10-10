@@ -14,7 +14,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  late final GoogleMapController _mapCtrl;
+  // late final GoogleMapController _mapCtrl;
   Completer<GoogleMapController> _controller = Completer();
   Location location = Location();
   final Set<Marker> newMarker = {};
@@ -23,27 +23,35 @@ class _MapScreenState extends State<MapScreen> {
   double officeLongitude = 107.0054;
   double toleranceInMeter = 100;
 
-  late LocationData currentLocation;
+  // late LocationData currentLocation;
 
   @override
   void initState() {
     super.initState();
-    getCurrentLocation();
+    // getCurrentLocation();
+    getLocation();
   }
 
   @override
   void dispose() {
-    _mapCtrl.dispose();
+    // _mapCtrl.dispose();
+    _disposeController();
     newMarker.clear();
     super.dispose();
   }
 
-  getLocation(GoogleMapController controller) async {
-    _mapCtrl = controller;
+  Future<void> _disposeController() async {
+    final GoogleMapController controller = await _controller.future;
+    controller.dispose();
+  }
+
+  getLocation() async {
+    // _mapCtrl = controller;
+    final GoogleMapController mapCtrl = await _controller.future;
 
     try {
       location.onLocationChanged.listen((LocationData currentLocation) {
-        _mapCtrl.animateCamera(
+        mapCtrl.animateCamera(
           CameraUpdate.newCameraPosition(
             CameraPosition(
                 target: LatLng(
@@ -66,91 +74,91 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  getCurrentLocation() {
-    location.onLocationChanged.listen((LocationData loc) {
-      currentLocation = location as LocationData;
-      if (mounted) {
-        setState(() {
-          newMarker.add(Marker(
-            markerId: const MarkerId('m1'),
-            position: LatLng(loc.latitude!, loc.longitude!),
-          ));
-        });
-      }
-    });
-  }
+  // getCurrentLocation() {
+  //   location.onLocationChanged.listen((LocationData loc) {
+  //     currentLocation = location as LocationData;
+  //     if (mounted) {
+  //       setState(() {
+  //         newMarker.add(Marker(
+  //           markerId: const MarkerId('m1'),
+  //           position: LatLng(loc.latitude!, loc.longitude!),
+  //         ));
+  //       });
+  //     }
+  //   });
+  // }
 
-  void updatePinOnMap() async {
-    CameraPosition cPosition = CameraPosition(
-      zoom: 18,
-      target: LatLng(currentLocation.latitude!, currentLocation.longitude!),
-    );
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(cPosition));
+  // void updatePinOnMap() async {
+  //   CameraPosition cPosition = CameraPosition(
+  //     zoom: 18,
+  //     target: LatLng(currentLocation.latitude!, currentLocation.longitude!),
+  //   );
+  //   final GoogleMapController controller = await _controller.future;
+  //   controller.animateCamera(CameraUpdate.newCameraPosition(cPosition));
 
-    setState(() {
-      // updated position
-      var pinPosition =
-          LatLng(currentLocation.latitude!, currentLocation.longitude!);
+  //   setState(() {
+  //     // updated position
+  //     var pinPosition =
+  //         LatLng(currentLocation.latitude!, currentLocation.longitude!);
 
-      newMarker.removeWhere((m) => m.markerId.value == 'sourcePin');
-      newMarker.add(
-        Marker(
-          markerId: MarkerId('sourcePin'),
+  //     newMarker.removeWhere((m) => m.markerId.value == 'sourcePin');
+  //     newMarker.add(
+  //       Marker(
+  //         markerId: MarkerId('sourcePin'),
 
-          position: pinPosition, // updated position
-          // icon: sourceIcon,
-        ),
-      );
-    });
-  }
+  //         position: pinPosition, // updated position
+  //         // icon: sourceIcon,
+  //       ),
+  //     );
+  //   });
+  // }
 
-  showPinsOnMap() {
-    var pinPosition =
-        LatLng(currentLocation.latitude!, currentLocation.longitude!);
+  // showPinsOnMap() {
+  //   var pinPosition =
+  //       LatLng(currentLocation.latitude!, currentLocation.longitude!);
 
-    // add the initial source location pin
-    newMarker.add(
-      Marker(
-        markerId: MarkerId('sourcePin'),
-        position: pinPosition,
-        onTap: () {},
-        // icon: sourceIcon,
-      ),
-    );
-  }
+  //   // add the initial source location pin
+  //   newMarker.add(
+  //     Marker(
+  //       markerId: MarkerId('sourcePin'),
+  //       position: pinPosition,
+  //       onTap: () {},
+  //       // icon: sourceIcon,
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
-    CameraPosition initialCameraPosition = CameraPosition(
-      target: LatLng(
-        currentLocation.latitude != null
-            ? currentLocation.latitude!
-            : officeLatitude,
-        currentLocation.longitude != null
-            ? currentLocation.longitude!
-            : officeLongitude,
-      ),
-      zoom: 16,
-    );
+    // CameraPosition initialCameraPosition = CameraPosition(
+    //   target: LatLng(
+    //     currentLocation.latitude != null
+    //         ? currentLocation.latitude!
+    //         : officeLatitude,
+    //     currentLocation.longitude != null
+    //         ? currentLocation.longitude!
+    //         : officeLongitude,
+    //   ),
+    //   zoom: 16,
+    // );
 
     return ClipRRect(
       borderRadius: const BorderRadius.all(
         Radius.circular(10),
       ),
       child: GoogleMap(
-        initialCameraPosition: initialCameraPosition,
-        // CameraPosition(
-        //   target: LatLng(
-        //     officeLatitude,
-        //     officeLongitude,
-        //   ),
-        //   zoom: 16,
-        // ),
+        initialCameraPosition:
+            // initialCameraPosition,
+            CameraPosition(
+          target: LatLng(
+            officeLatitude,
+            officeLongitude,
+          ),
+          zoom: 16,
+        ),
         markers: newMarker,
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
-          showPinsOnMap();
         },
       ),
     );
