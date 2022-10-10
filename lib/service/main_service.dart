@@ -417,7 +417,8 @@ class MainService {
     Map<String, String> headers = {
       'X-TenantID': '${await getTenantId()}',
       'Authorization': 'Bearer ${await getAccessToken()}',
-      "content-type": "application/json"
+      "AuthorizationToken": '${await getAuthoritiesToken()}',
+      // "content-type": "application/json"
     };
 
     var res = await http
@@ -437,6 +438,7 @@ class MainService {
     Map<String, String> headers = {
       'X-TenantID': '${await getTenantId()}',
       'Authorization': 'Bearer ${await getAccessToken()}',
+      "AuthorizationToken": '${await getAuthoritiesToken()}'
     };
 
     if (loading) {
