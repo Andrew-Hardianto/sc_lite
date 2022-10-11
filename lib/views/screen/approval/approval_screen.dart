@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sc_lite/service/main_service.dart';
@@ -26,7 +27,6 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -49,49 +49,57 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
         var data = jsonDecode(res.body);
 
         if (data.length != 0) {
-          var absence = data.filter((res) => res.name == "Absence");
+          var absence = data.where((res) => res['name'] == "Absence").toList();
+
           if (absence.length != 0) {
-            absence[0].detail.forEach((count) {
-              if (count.name == "Leave") {
-                totalCountLeave = count.value;
-              }
-              if (count.name == "Permission") {
-                totalCountPermission = count.value;
-              }
-              if (count.name == "Sick") {
-                totalCountSick = count.value;
-              }
+            setState(() {
+              absence[0]['detail'].forEach((count) {
+                if (count['name'] == "Leave") {
+                  totalCountLeave = num.parse(count['value']);
+                }
+                if (count['name'] == "Permission") {
+                  totalCountPermission = num.parse(count['value']);
+                }
+                if (count['name'] == "Sick") {
+                  totalCountSick = num.parse(count['value']);
+                }
+              });
             });
           }
           // end of set count absence
 
           // set count time
-          var time = res.filter((res) => res.name == "Time");
+          var time = data.where((res) => res['name'] == "Time").toList();
           if (time.length != 0) {
-            time[0].detail.forEach((count) {
-              if (count.name == "Check In / Out") {
-                totalCountCheckInOut = count.value;
-              }
+            setState(() {
+              time[0]['detail'].forEach((count) {
+                if (count['name'] == "Check In / Out") {
+                  totalCountCheckInOut = num.parse(count['value']);
+                }
 
-              // set count shift change
-              if (count.name == "Shift Change") {
-                totalCountShiftChange = count.value;
-              }
-              // end of set count shift change
+                // set count shift change
+                if (count['name'] == "Shift Change") {
+                  totalCountShiftChange = num.parse(count['value']);
+                }
+                // end of set count shift change
 
-              // set count time off
-              if (count.name == "Time Off") {
-                totalCountTimeOff = count.value;
-              }
-              // end of set count time off
+                // set count time off
+                if (count['name'] == "Time Off") {
+                  totalCountTimeOff = num.parse(count['value']);
+                }
+                // end of set count time off
+              });
             });
           }
           // end of set count time
 
           // set count overtime
-          var overtime = res.filter((res) => res.name == "Overtime");
+          var overtime =
+              data.where((res) => res['name'] == "Overtime").toList();
           if (overtime.length != 0) {
-            totalCountOvertime = overtime[0].value;
+            setState(() {
+              totalCountOvertime = num.parse(overtime[0]['value']);
+            });
           }
         }
       } else {
@@ -145,7 +153,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
+                    const Text(
                       'Absence',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -160,16 +168,34 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                         children: [
                           Column(
                             children: [
-                              InkWell(
-                                onTap: () {
-                                  // Navigator.of(context)
-                                  //     .pushNamed(TimeOffScreen.routeName);
-                                },
-                                child: SvgPicture.asset(
-                                  'assets/icon/approval/permission-approval.svg',
-                                  width: 54,
-                                ),
-                              ),
+                              totalCountPermission != 0
+                                  ? Badge(
+                                      badgeContent: Text(
+                                        '$totalCountPermission',
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          // Navigator.of(context)
+                                          //     .pushNamed(TimeOffScreen.routeName);
+                                        },
+                                        child: SvgPicture.asset(
+                                          'assets/icon/approval/permission-approval.svg',
+                                          width: 54,
+                                        ),
+                                      ),
+                                    )
+                                  : InkWell(
+                                      onTap: () {
+                                        // Navigator.of(context)
+                                        //     .pushNamed(TimeOffScreen.routeName);
+                                      },
+                                      child: SvgPicture.asset(
+                                        'assets/icon/approval/permission-approval.svg',
+                                        width: 54,
+                                      ),
+                                    ),
                               const SizedBox(
                                 height: 5,
                               ),
@@ -183,16 +209,28 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                           ),
                           Column(
                             children: [
-                              InkWell(
-                                onTap: () {
-                                  // Navigator.of(context)
-                                  //     .pushNamed(TimeOffScreen.routeName);
-                                },
-                                child: SvgPicture.asset(
-                                  'assets/icon/approval/sick-approval.svg',
-                                  width: 54,
-                                ),
-                              ),
+                              totalCountSick != 0
+                                  ? Badge(
+                                      badgeContent: Text(
+                                        '$totalCountSick',
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {},
+                                        child: SvgPicture.asset(
+                                          'assets/icon/approval/sick-approval.svg',
+                                          width: 54,
+                                        ),
+                                      ),
+                                    )
+                                  : InkWell(
+                                      onTap: () {},
+                                      child: SvgPicture.asset(
+                                        'assets/icon/approval/sick-approval.svg',
+                                        width: 54,
+                                      ),
+                                    ),
                               const SizedBox(
                                 height: 5,
                               ),
@@ -206,16 +244,34 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                           ),
                           Column(
                             children: [
-                              InkWell(
-                                onTap: () {
-                                  // Navigator.of(context)
-                                  //     .pushNamed(TimeOffScreen.routeName);
-                                },
-                                child: SvgPicture.asset(
-                                  "assets/icon/approval/leave-approval.svg",
-                                  width: 54,
-                                ),
-                              ),
+                              totalCountLeave != 0
+                                  ? Badge(
+                                      badgeContent: Text(
+                                        '$totalCountLeave',
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          // Navigator.of(context)
+                                          //     .pushNamed(TimeOffScreen.routeName);
+                                        },
+                                        child: SvgPicture.asset(
+                                          "assets/icon/approval/leave-approval.svg",
+                                          width: 54,
+                                        ),
+                                      ),
+                                    )
+                                  : InkWell(
+                                      onTap: () {
+                                        // Navigator.of(context)
+                                        //     .pushNamed(TimeOffScreen.routeName);
+                                      },
+                                      child: SvgPicture.asset(
+                                        "assets/icon/approval/leave-approval.svg",
+                                        width: 54,
+                                      ),
+                                    ),
                               const SizedBox(
                                 height: 5,
                               ),
@@ -233,7 +289,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                     const SizedBox(
                       height: 10,
                     ),
-                    Text(
+                    const Text(
                       'Time',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -248,18 +304,38 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                         children: [
                           Column(
                             children: [
-                              InkWell(
-                                onTap: () {
-                                  Navigator.of(context).pushNamed(
-                                    CheckinoutListScreen.routeName,
-                                    arguments: {'type': 'Approval'},
-                                  );
-                                },
-                                child: SvgPicture.asset(
-                                  'assets/icon/approval/checkinout-approval.svg',
-                                  width: 54,
-                                ),
-                              ),
+                              totalCountCheckInOut != 0
+                                  ? Badge(
+                                      badgeContent: Text(
+                                        '$totalCountCheckInOut',
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).pushNamed(
+                                            CheckinoutListScreen.routeName,
+                                            arguments: {'type': 'Approval'},
+                                          );
+                                        },
+                                        child: SvgPicture.asset(
+                                          'assets/icon/approval/checkinout-approval.svg',
+                                          width: 54,
+                                        ),
+                                      ),
+                                    )
+                                  : InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).pushNamed(
+                                          CheckinoutListScreen.routeName,
+                                          arguments: {'type': 'Approval'},
+                                        );
+                                      },
+                                      child: SvgPicture.asset(
+                                        'assets/icon/approval/checkinout-approval.svg',
+                                        width: 54,
+                                      ),
+                                    ),
                               const SizedBox(
                                 height: 5,
                               ),
@@ -273,16 +349,34 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                           ),
                           Column(
                             children: [
-                              InkWell(
-                                onTap: () {
-                                  // Navigator.of(context)
-                                  //     .pushNamed(TimeOffScreen.routeName);
-                                },
-                                child: SvgPicture.asset(
-                                  'assets/icon/approval/overtime-approval.svg',
-                                  width: 54,
-                                ),
-                              ),
+                              totalCountOvertime != 0
+                                  ? Badge(
+                                      badgeContent: Text(
+                                        '$totalCountOvertime',
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          // Navigator.of(context)
+                                          //     .pushNamed(TimeOffScreen.routeName);
+                                        },
+                                        child: SvgPicture.asset(
+                                          'assets/icon/approval/overtime-approval.svg',
+                                          width: 54,
+                                        ),
+                                      ),
+                                    )
+                                  : InkWell(
+                                      onTap: () {
+                                        // Navigator.of(context)
+                                        //     .pushNamed(TimeOffScreen.routeName);
+                                      },
+                                      child: SvgPicture.asset(
+                                        'assets/icon/approval/overtime-approval.svg',
+                                        width: 54,
+                                      ),
+                                    ),
                               const SizedBox(
                                 height: 5,
                               ),
@@ -296,16 +390,34 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                           ),
                           Column(
                             children: [
-                              InkWell(
-                                onTap: () {
-                                  // Navigator.of(context)
-                                  //     .pushNamed(TimeOffScreen.routeName);
-                                },
-                                child: SvgPicture.asset(
-                                  "assets/icon/approval/shift-change.svg",
-                                  width: 54,
-                                ),
-                              ),
+                              totalCountShiftChange != 0
+                                  ? Badge(
+                                      badgeContent: Text(
+                                        '$totalCountShiftChange',
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          // Navigator.of(context)
+                                          //     .pushNamed(TimeOffScreen.routeName);
+                                        },
+                                        child: SvgPicture.asset(
+                                          "assets/icon/approval/shift-change.svg",
+                                          width: 54,
+                                        ),
+                                      ),
+                                    )
+                                  : InkWell(
+                                      onTap: () {
+                                        // Navigator.of(context)
+                                        //     .pushNamed(TimeOffScreen.routeName);
+                                      },
+                                      child: SvgPicture.asset(
+                                        "assets/icon/approval/shift-change.svg",
+                                        width: 54,
+                                      ),
+                                    ),
                               const SizedBox(
                                 height: 5,
                               ),
@@ -330,16 +442,34 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                         children: [
                           Column(
                             children: [
-                              InkWell(
-                                onTap: () {
-                                  // Navigator.of(context)
-                                  //     .pushNamed(TimeOffScreen.routeName);
-                                },
-                                child: SvgPicture.asset(
-                                  'assets/icon/approval/time-off.svg',
-                                  width: 54,
-                                ),
-                              ),
+                              totalCountTimeOff != 0
+                                  ? Badge(
+                                      badgeContent: Text(
+                                        '$totalCountTimeOff',
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          // Navigator.of(context)
+                                          //     .pushNamed(TimeOffScreen.routeName);
+                                        },
+                                        child: SvgPicture.asset(
+                                          'assets/icon/approval/time-off.svg',
+                                          width: 54,
+                                        ),
+                                      ),
+                                    )
+                                  : InkWell(
+                                      onTap: () {
+                                        // Navigator.of(context)
+                                        //     .pushNamed(TimeOffScreen.routeName);
+                                      },
+                                      child: SvgPicture.asset(
+                                        'assets/icon/approval/time-off.svg',
+                                        width: 54,
+                                      ),
+                                    ),
                               const SizedBox(
                                 height: 5,
                               ),

@@ -8,6 +8,7 @@ import 'package:sc_lite/utils/extension.dart';
 import 'package:sc_lite/service/main_service.dart';
 import 'package:sc_lite/views/widget/text-appbar/text_appbar.dart';
 import 'package:sc_lite/views/widget/textdate/text_date.dart';
+import 'dart:math' as math;
 
 class LeaveScreen extends StatefulWidget {
   static const String routeName = '/self-service/leave';
@@ -79,6 +80,44 @@ class _LeaveScreenState extends State<LeaveScreen> {
         mainService.errorHandlingHttp(res, context);
       }
     });
+  }
+
+  countWorkingDays(start, end, absenceTypeId) async {
+    String urlApi = mainService.urlApi() +
+        "/api/user/self-service/absence/count-working-days?employmentId=" +
+        await mainService.getProfile()['employmentId'] +
+        "&startDate=" +
+        DateFormat("yyyy-MM-dd").format(start) +
+        "&endDate=" +
+        DateFormat("yyyy-MM-dd").format(end) +
+        "&absenceTypeId=" +
+        absenceTypeId;
+
+    mainService.getUrlHttp(urlApi, true, (res) {
+      if (res.statusCode == 200) {
+        var data = jsonDecode(res.body);
+        setState(() {
+          eligibleLeaveDate = data;
+        });
+        mainService.hideLoading();
+      } else {
+        mainService.hideLoading();
+        mainService.errorHandlingHttp(res, context);
+      }
+    });
+  }
+
+  getDays() {
+    var startDateConv = DateTime.fromMillisecondsSinceEpoch(
+        leaveStartDateFinal!.millisecondsSinceEpoch);
+    var endDateConv = DateTime.fromMillisecondsSinceEpoch(
+        leaveEndDateFinal!.millisecondsSinceEpoch);
+
+    var DifferenceInTime = endDateConv.millisecond - startDateConv.millisecond;
+    var DifferenceInDays = DifferenceInTime / (1000 * 3600 * 24);
+
+    countWorkingDays(leaveStartDateFinal, leaveEndDateFinal, leaveTypeFinal);
+    totalLeaveDate = (DifferenceInDays).round() + 1;
   }
 
   selectType(value) {

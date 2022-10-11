@@ -17,7 +17,6 @@ import 'package:badges/badges.dart';
 import 'package:sc_lite/views/screen/self-service/checkinout/checkinout_screen.dart';
 import 'package:sc_lite/views/screen/self-service/leave/leave_screen.dart';
 import 'package:sc_lite/views/screen/self-service/overtime/overtime_screen.dart';
-import 'package:sc_lite/views/screen/self-service/payslip/payslip-detail/payslip_detail.dart';
 import 'package:sc_lite/views/screen/self-service/payslip/payslip_screen.dart';
 import 'package:sc_lite/views/screen/self-service/permission/permission_screen.dart';
 import 'package:sc_lite/views/screen/self-service/shift-change/shift_change_screen.dart';
@@ -93,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   String? tutorial;
   Stream? timer;
+  late StreamSubscription _sub;
 
   initPage() {
     isSkeletonLoading = true;
@@ -109,10 +109,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         }
       }
     });
-    animationCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1500));
-    animationDissapoint = Tween(begin: 0.0, end: 0.0).animate(animationCtrl);
-    animationHappy = Tween(begin: 0.0, end: 0.0).animate(animationCtrl);
+
+    if (mounted) {
+      setState(() {
+        animationCtrl = AnimationController(
+            vsync: this, duration: const Duration(milliseconds: 1500));
+        animationDissapoint =
+            Tween(begin: 0.0, end: 0.0).animate(animationCtrl);
+        animationHappy = Tween(begin: 0.0, end: 0.0).animate(animationCtrl);
+      });
+    }
     mainService.storage.read(key: 'home-tutorial').then((value) {
       setState(() {
         tutorial = value;
@@ -125,6 +131,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     intervalLate.cancel();
     animationCtrl.dispose();
     today = DateTime.now();
+    _sub.cancel();
     super.dispose();
   }
 
@@ -296,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return today;
     });
 
-    timer!.listen((data) {
+    _sub = timer!.listen((data) {
       setState(() {
         intervalTime = data;
       });
@@ -465,13 +472,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     mainService.getUrlHttp(urlApi, false, (dynamic res) {
       if (res.statusCode == 200) {
         var count = jsonDecode(res.body);
-        print(count);
-        // var absenceData =
-        //     count.where((dynamic data) => data['name'] == 'Absence');
-        // var timeData = count.where((dynamic data) => data['name'] == 'Time');
-        // var absence =
-        //     absenceData.length == 0 ? 0 : int.parse(absenceData[0].value);
-        // var time = timeData.length == 0 ? 0 : int.parse(timeData[0].value);
+        setState(() {
+          mainService.countApproval = count;
+        });
+
         setState(() {
           // mainService.countApproval = absence + time;
           isSkeletonLoadingMenuAccess = false;
@@ -498,7 +502,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           PopupMenuItem<String>(
             padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 6),
             enabled: true,
-            onTap: logout,
+            onTap: () {},
             child: ListTile(
               leading: const Icon(Icons.settings_outlined),
               iconColor: '#3DC0F0'.toColor(), // your icon
@@ -613,9 +617,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     mainService.deleteStorage('G!T@VTR');
     mainService.deleteStorage('ACT@KN2');
     mainService.deleteStorage('P@CKGN!');
-    dispose();
-    Future.delayed(const Duration(milliseconds: 1000)).then((value) =>
-        Navigator.of(context).pushReplacementNamed(LoginScreen.routeName));
+
+    Future.delayed(const Duration(milliseconds: 1000)).then((value) {
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+      }
+    });
   }
 
   void showTutorial() {
@@ -810,10 +817,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         InkWell(
                           key: _key2,
                           borderRadius: BorderRadius.circular(50),
-                          onTap: () {
-                            Navigator.of(context)
-                                .pushNamed(LeaveScreen.routeName);
-                          },
+                          onTap: () {},
                           child: const Icon(
                             Icons.notifications_outlined,
                             size: 43.0,
@@ -848,7 +852,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     child: Text(
                                       profile.alias ?? '-',
                                       style: const TextStyle(
-                                          color: Colors.white, fontSize: 48),
+                                          color: Colors.white, fontSize: 24),
                                     ),
                                   ),
                                 ),
@@ -1299,7 +1303,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         margin: const EdgeInsets.only(top: 10),
                         width: double.infinity,
                         child: Wrap(
-                          spacing: 15.0,
+                          alignment: WrapAlignment.spaceBetween,
+                          spacing: 8.0,
                           runSpacing: 10.0,
                           children: [
                             Column(
@@ -1329,8 +1334,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               children: [
                                 InkWell(
                                   onTap: () {
-                                    Navigator.of(context)
-                                        .pushNamed(LeaveScreen.routeName);
+                                    Navigator.of(context).pushNamed(
+                                      LeaveScreen.routeName,
+                                    );
                                   },
                                   child: SvgPicture.asset(
                                     'assets/icon/home/leave.svg',
@@ -1487,7 +1493,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   'Time Off',
                                   style: TextStyle(
                                       fontSize: 10,
-                                      fontWeight: FontWeight.w600),
+                                      fontWeight: FontWeight.w500),
                                   textAlign: TextAlign.center,
                                 )
                               ],
@@ -1622,7 +1628,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Text(
-                      'Popular Services',
+                      'More Access',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     if (isSkeletonLoadingMenuAccess)
@@ -1668,37 +1674,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         margin: const EdgeInsets.only(top: 10),
                         width: double.infinity,
                         child: Wrap(
-                          spacing: 15.0,
+                          alignment: WrapAlignment.spaceBetween,
+                          spacing: 10.0,
                           runSpacing: 10.0,
                           children: mainService.validSidemenu.map((e) {
                             return Column(
                               children: [
-                                if (mainService.countApproval != 0 &&
-                                    e['count'])
-                                  Badge(
-                                    badgeContent: Text(
-                                      '${mainService.countApproval}',
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 14),
-                                    ),
-                                    child: InkWell(
-                                      onTap: () {},
-                                      child: SvgPicture.asset(
-                                        e['icon'],
-                                        width: 54,
+                                mainService.countApproval != 0 && e['count']
+                                    ? Badge(
+                                        badgeContent: Text(
+                                          '${mainService.countApproval}',
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12),
+                                        ),
+                                        child: InkWell(
+                                          onTap: () {
+                                            Navigator.of(context)
+                                                .pushNamed(e['url']);
+                                          },
+                                          child: SvgPicture.asset(
+                                            e['icon'],
+                                            width: 54,
+                                          ),
+                                        ),
+                                      )
+                                    : InkWell(
+                                        onTap: () {
+                                          Navigator.of(context)
+                                              .pushNamed(e['url']);
+                                        },
+                                        child: SvgPicture.asset(
+                                          e['icon'],
+                                          width: 54,
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                if (mainService.countApproval == 0)
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.of(context).pushNamed(e['url']);
-                                    },
-                                    child: SvgPicture.asset(
-                                      e['icon'],
-                                      width: 54,
-                                    ),
-                                  ),
                                 const SizedBox(
                                   height: 5,
                                 ),

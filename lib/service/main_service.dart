@@ -209,6 +209,10 @@ class MainService {
     return color;
   }
 
+  getProfile() async {
+    return jsonDecode(decrypt(await storage.read(key: "AU@HZS!")));
+  }
+
   getAuthoritiesToken() async {
     final profile = await storage.read(key: 'AU@HZS!');
     if (profile != null) {
@@ -395,6 +399,10 @@ class MainService {
       "AuthorizationToken": '${await getAuthoritiesToken()}'
     };
 
+    if (loading) {
+      showLoading();
+    }
+
     var res = await http.get(Uri.parse(url), headers: headers).timeout(
           Duration(milliseconds: timeoutms),
           onTimeout: () => http.Response(
@@ -403,14 +411,14 @@ class MainService {
           ),
         );
 
-    if (loading) {
-      showLoading();
-      callback(res);
-    } else {
-      callback(res);
-    }
+    // if (loading) {
+    //   showLoading();
+    //   callback(res);
+    // } else {
+    //   callback(res);
+    // }
 
-    return res;
+    return callback(res);
   }
 
   postUrlApi(String urlApi, bool loading, formData, Function callback) async {

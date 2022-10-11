@@ -79,6 +79,8 @@ class _CheckinoutDetailState extends State<CheckinoutDetail> {
   getDetail() async {
     String urlApi = await mainService.urlApi();
 
+    randomColor = await mainService.getRandomColor();
+
     if (type == "Approval") {
       urlApi +=
           "/api/user/self-service/check-in-out/request/approval/${dataApprovalId!}";
@@ -239,7 +241,7 @@ class _CheckinoutDetailState extends State<CheckinoutDetail> {
                 ],
               ),
             ),
-            SingleChildScrollView(
+            Expanded(
               child: segmentDetailActive
                   ? Container(
                       height: 550,
@@ -248,10 +250,68 @@ class _CheckinoutDetailState extends State<CheckinoutDetail> {
                         vertical: 20,
                         horizontal: 20,
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: ListView(
+                        shrinkWrap: true,
+                        // mainAxisAlignment: MainAxisAlignment.start,
+                        // crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            children: [
+                              if (dataDetail['profilePictureUrl'] != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: Image.network(
+                                    dataDetail['profilePictureUrl'],
+                                    width: 60.0,
+                                    height: 60.0,
+                                  ),
+                                ),
+                              if (dataDetail['profilePictureUrl'] == null)
+                                Container(
+                                  width: 60.0,
+                                  height: 60.0,
+                                  decoration: BoxDecoration(
+                                    color: randomColor == null
+                                        ? '#121212'.toColor()
+                                        : '$randomColor'.toColor(),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      dataDetail['alias'] ?? '-',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              const SizedBox(
+                                width: 20,
+                              ),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${dataDetail["employeeName"]}',
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    '${dataDetail["employeeNo"]}',
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
                           Card(
                             color: '#F3F3F3'.toColor(),
                             shape: RoundedRectangleBorder(
@@ -360,10 +420,6 @@ class _CheckinoutDetailState extends State<CheckinoutDetail> {
                                         ),
                                       if (!isSkeletonLoading)
                                         Text(
-                                          // dataDetail['type'] != null &&
-                                          //         dataDetail['type'] == 'CHECKIN'
-                                          //     ? 'Check In - '
-                                          //     : 'Check Out - ${(dataDetail['isOutOfOffice'] && dataDetail['isOutOfOffice'] != null) ? 'Out of Office' : 'In Office'}',
                                           "${dataDetail['type'] == 'CHECKIN' ? 'Check In - ' : 'Check Out -'}${(dataDetail['isOutOfOffice'] == true) ? 'Out of Office' : 'In Office'}",
                                           style: const TextStyle(
                                             fontSize: 16,
@@ -758,7 +814,7 @@ class _CheckinoutDetailState extends State<CheckinoutDetail> {
                                               ),
                                             ),
                                           SizedBox(
-                                            height: 150,
+                                            height: 180,
                                             width: (MediaQuery.of(context)
                                                         .size
                                                         .width /
@@ -788,6 +844,7 @@ class _CheckinoutDetailState extends State<CheckinoutDetail> {
                                                                     .width /
                                                                 100) *
                                                             40,
+                                                    // height: 120,
                                                     child: Column(
                                                       crossAxisAlignment:
                                                           CrossAxisAlignment
@@ -871,13 +928,24 @@ class _CheckinoutDetailState extends State<CheckinoutDetail> {
                                                           CrossAxisAlignment
                                                               .center,
                                                       children: [
-                                                        SvgPicture.asset(
-                                                            'assets/icon/general/approve.svg'),
+                                                        if (e['status'] ==
+                                                            "Approved")
+                                                          SvgPicture.asset(
+                                                            'assets/icon/general/approve.svg',
+                                                          ),
+                                                        if (e['status'] !=
+                                                            "Approved")
+                                                          SvgPicture.asset(
+                                                            'assets/icon/general/reject.svg',
+                                                          ),
                                                         Text(
                                                           '${e["status"]}',
                                                           style: TextStyle(
-                                                            color: '00DF16'
-                                                                .toColor(),
+                                                            color: e['status'] ==
+                                                                    "Approved"
+                                                                ? '#00DF16'
+                                                                    .toColor()
+                                                                : Colors.red,
                                                           ),
                                                         )
                                                       ],

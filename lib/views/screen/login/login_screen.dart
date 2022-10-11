@@ -111,8 +111,11 @@ class _LoginScreenState extends State<LoginScreen> {
         mainService.saveStorage('RF@S!TK', data['refresh_token']);
         mainService.saveStorage('SPS!#WU', jsonEncode(keyJson));
         mainService.saveStorage('G!T@FTR', mainService.saveRandomColor());
-        Future.delayed(const Duration(milliseconds: 1000)).then((value) =>
-            Navigator.of(context).pushReplacementNamed(HomeScreen.routeName));
+        Future.delayed(const Duration(milliseconds: 1000)).then((value) {
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+          }
+        });
       } else {
         mainService.errorHandlingHttpLogin(res, context);
       }

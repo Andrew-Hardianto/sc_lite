@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -35,6 +36,8 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
   List arrMarker = [];
 
   num dataCount = 0;
+
+  String? randomColor;
 
   bool selectAll = false;
 
@@ -150,6 +153,8 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
   getListData(String dataStatus) async {
     String urlApi = await mainService.urlApi();
 
+    randomColor = await mainService.getRandomColor();
+
     if (dataStatus == 'In Progress' && type == 'Approval') {
       urlApi +=
           "/api/user/self-service/check-in-out/request/approval/need-approval?status=$dataStatus";
@@ -191,10 +196,17 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
           if (dataStatus == 'In Progress') {
             dataCount = listData.length;
           }
+          if (activeDataStatus == 'In Progress' && type == "Approval") {
+            for (var element in listData) {
+              element['check'] = false;
+            }
+          }
         });
       } else {
         mainService.hideLoading();
-        mainService.errorHandlingHttp(res, context);
+        if (mounted) {
+          mainService.errorHandlingHttp(res, context);
+        }
       }
     });
   }
@@ -210,6 +222,30 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
       CheckinoutDetail.routeName,
       arguments: params,
     );
+  }
+
+  checkEvent(val, dynamic requestId) {
+    var totalItems = listData.length;
+    setState(() {
+      var idx = listData.indexWhere((res) => res['requestId'] == requestId);
+
+      listData[idx]['check'] = val;
+
+      var checked = 0;
+      listData.map((obj) {
+        if (obj['check']) checked++;
+      });
+
+      if (checked < totalItems - 1) {
+        selectAll = false;
+      } else if (checked == totalItems) {
+        selectAll = true;
+      } else {
+        selectAll = false;
+      }
+    });
+
+    // handleMarker(listData[idx]);
   }
 
   @override
@@ -238,7 +274,7 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
                 children: [
                   Container(
                     height: 45,
-                    width: (MediaQuery.of(context).size.width / 100) * 65,
+                    width: (MediaQuery.of(context).size.width / 100) * 60,
                     margin: const EdgeInsets.symmetric(vertical: 10),
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
@@ -380,7 +416,7 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
                   ),
                 ),
               ),
-            if (listData.isNotEmpty)
+            if (listData.isNotEmpty && type == "Status")
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
@@ -459,6 +495,248 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
                                 ),
                               ),
                             ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ),
+            if (listData.isNotEmpty &&
+                type == "Approval" &&
+                activeDataStatus == "In Progress")
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 10),
+                      height: 130,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.0),
+                          color: '#F3F3F3'.toColor()),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    margin: const EdgeInsets.only(top: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                            child: const Text(
+                              'REJECT',
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: 40,
+                          width: 120,
+                          // margin: const EdgeInsets.only(top: 5),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                '#29a7b8'.toColor(),
+                                '#3df06f'.toColor(),
+                              ],
+                              begin: Alignment.bottomLeft,
+                              end: Alignment.topRight,
+                              stops: const [0.1, 0.9],
+                              tileMode: TileMode.clamp,
+                              transform: const GradientRotation(pi / 6),
+                            ),
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              disabledBackgroundColor: Colors.blue.shade200,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                            child: const Text(
+                              'APPROVE',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          shape: const CircleBorder(),
+                          value: selectAll,
+                          onChanged: (value) {
+                            setState(() {
+                              selectAll = value!;
+                            });
+                          },
+                        ),
+                        const Text(
+                          'Select All',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w400),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            if (listData.isNotEmpty && type == "Approval")
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: listData
+                        .map(
+                          (e) => Row(
+                            children: [
+                              if (activeDataStatus == 'In Progress')
+                                Checkbox(
+                                  shape: const CircleBorder(),
+                                  value: e['check'],
+                                  onChanged: (value) {
+                                    checkEvent(value, e['requestId']);
+                                  },
+                                ),
+                              Container(
+                                margin:
+                                    const EdgeInsets.only(top: 10, bottom: 10),
+                                height: 150,
+                                width: activeDataStatus == 'In Progress'
+                                    ? MediaQuery.of(context).size.width / 1.3
+                                    : MediaQuery.of(context).size.width - 50,
+                                child: InkWell(
+                                  onTap: () {
+                                    if (activeDataStatus != "In Progress") {
+                                      goToDetail(e);
+                                    }
+                                  },
+                                  child: Card(
+                                    color: '#F3F3F3'.toColor(),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Row(
+                                        children: [
+                                          if (e['employeeProfile'] != null)
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
+                                              child: Image.network(
+                                                e['employeeProfile'],
+                                                width: 60.0,
+                                                height: 60.0,
+                                              ),
+                                            ),
+                                          if (e['employeeProfile'] == null)
+                                            Container(
+                                              width: 60.0,
+                                              height: 60.0,
+                                              decoration: BoxDecoration(
+                                                color: randomColor == null
+                                                    ? '#121212'.toColor()
+                                                    : '$randomColor'.toColor(),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  e['alias'] ?? '-',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 24,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          const SizedBox(
+                                            width: 10,
+                                          ),
+                                          SizedBox(
+                                            width: activeDataStatus ==
+                                                    "In Progress"
+                                                ? 170
+                                                : 200,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  e['employeeName'],
+                                                  softWrap: true,
+                                                  overflow: TextOverflow.clip,
+                                                  style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                Text(
+                                                  e['employeeNo'],
+                                                  style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                Text(
+                                                  e['type'] == 'Check In'
+                                                      ? 'Check In'
+                                                      : 'Check Out',
+                                                  style: TextStyle(
+                                                    color: '#3DC0F0'.toColor(),
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  DateFormat('dd MMM yyyy')
+                                                      .format(DateTime
+                                                          .fromMillisecondsSinceEpoch(
+                                                              e['actualTimeMilliSecond'])),
+                                                ),
+                                                Text(
+                                                  '${e["purposeValue"] ?? "-"}',
+                                                  softWrap: true,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         )
                         .toList(),

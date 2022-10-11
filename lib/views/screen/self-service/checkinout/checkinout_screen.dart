@@ -1,12 +1,17 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sc_lite/service/main_service.dart';
 import 'package:sc_lite/views/widget/map/google_map_screen.dart';
 import 'package:sc_lite/views/widget/text-appbar/text_appbar.dart';
 import 'package:location/location.dart';
 import 'package:sc_lite/utils/extension.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CheckinoutScreen extends StatefulWidget {
   static const String routeName = '/self-service/checkinout';
@@ -24,6 +29,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
   final mainService = MainService();
   List<dynamic> purposeList = [];
   final TextEditingController _remarks = TextEditingController();
+  Completer<GoogleMapController> _controller = Completer();
 
   bool takePhoto = false;
   File? image;
@@ -35,6 +41,10 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
   double lat = 0.0;
   double lng = 0.0;
 
+  num companyLong = 0;
+  num companyLat = 0;
+  num toleranceMeter = 0;
+
   String? selectedItem;
 
   bool isButtonActive = false;
@@ -42,6 +52,8 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
   @override
   void initState() {
     super.initState();
+    getListPurpose();
+    getLocation();
   }
 
   @override
@@ -53,6 +65,161 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
     setState(() {
       reload -= 1 / 1;
     });
+  }
+
+  getListPurpose() async {
+    String urlApi =
+        '${await mainService.urlApi()}/api/lookup/global-key?name=TM_CHECKINOUT_PURPOSES';
+
+    mainService.getUrlHttp(urlApi, false, (res) {
+      if (res.statusCode == 200) {
+        var data = jsonDecode(res.body);
+        setState(() {
+          purposeList = data;
+        });
+      } else {
+        mainService.errorHandlingHttp(res, context);
+      }
+    });
+  }
+
+  getLocation() async {
+    String urlApi =
+        "${await mainService.urlApi()}/api/user/home/dashboard/location";
+
+    mainService.getUrlHttp(urlApi, false, (res) {
+      if (res.statusCode != 200) {
+        mainService.errorHandlingHttp(res, context);
+      } else {
+        var data = jsonDecode(res.body);
+        setState(() {
+          companyLat = data["latitude"];
+          companyLong = data["longitude"];
+          toleranceMeter = data["toleranceInMeter"];
+        });
+      }
+    });
+  }
+
+  Future pickImage() async {
+    try {
+      final img = await ImagePicker().pickImage(source: ImageSource.camera);
+      if (img == null) return;
+      setState(() {
+        image = File(img.path);
+      });
+    } on PlatformException catch (e) {
+      print('Failed to pick image: $e');
+    }
+  }
+
+  showBottomSheet(BuildContext context) async {
+    await showModalBottomSheet(
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        context: context,
+        builder: (context) {
+          return FractionallySizedBox(
+            heightFactor: 0.3,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        pickImage()
+                            .whenComplete(() => Navigator.of(context).pop());
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: image == null
+                              ? BorderRadius.circular(10.0)
+                              : const BorderRadius.only(
+                                  topRight: Radius.circular(10),
+                                  topLeft: Radius.circular(10),
+                                  bottomLeft: Radius.circular(0),
+                                  bottomRight: Radius.circular(0),
+                                ),
+                        ),
+                      ),
+                      child: Text(
+                        'Take a Picture',
+                        style: TextStyle(
+                          color: '#3DC0F0'.toColor(),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (image != null)
+                    SizedBox(
+                      height: 50,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            image = null;
+                          });
+                          Navigator.of(context).pop();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(0),
+                              topLeft: Radius.circular(0),
+                              bottomLeft: Radius.circular(10),
+                              bottomRight: Radius.circular(10),
+                            ),
+                          ),
+                        ),
+                        child: const Text(
+                          'Delete Picture',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        });
   }
 
   submitData(BuildContext context) {}
@@ -108,7 +275,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
-                  child: const MapScreen(),
+                  // child: const MapScreen(),
                 ),
                 Container(
                   padding:
@@ -184,7 +351,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                             ),
                             child: InkWell(
                               onTap: () {
-                                // showBottomSheet(context);
+                                showBottomSheet(context);
                               },
                               child: image == null
                                   ? Column(

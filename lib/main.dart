@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:sc_lite/provider/user_provider.dart';
 import 'package:sc_lite/router.dart';
 import 'package:sc_lite/service/main_service.dart';
+import 'package:sc_lite/views/screen/get-started/get_started_screen.dart';
 import 'package:sc_lite/views/screen/home/home_screen.dart';
 import 'package:sc_lite/views/screen/login/login_screen.dart';
 
@@ -38,10 +39,35 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final mainService = MainService();
+  dynamic first;
+  dynamic token;
 
   @override
   void initState() {
     super.initState();
+    // _initPage();
+  }
+
+  Widget? _initPage() {
+    mainService.storage.read(key: 'firstLaunch').then((value) {
+      setState(() {
+        first = value;
+      });
+    });
+    mainService.storage.read(key: 'ACT@KN2').then((value) {
+      setState(() {
+        token = value;
+      });
+    });
+    if (first != null) {
+      if (token == null) {
+        return const LoginScreen();
+      } else if (token != null) {
+        return const HomeScreen();
+      }
+    } else {
+      return const GetStartedScreen();
+    }
   }
 
   @override
@@ -55,7 +81,7 @@ class _MyAppState extends State<MyApp> {
         fontFamily: 'Nunito',
       ),
       onGenerateRoute: ((settings) => generateRoute(settings)),
-      home: const HomeScreen(),
+      home: _initPage(),
       builder: EasyLoading.init(),
     );
   }
