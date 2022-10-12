@@ -178,14 +178,14 @@ class _ShiftChangeScreenState extends State<ShiftChangeScreen> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: ElevatedButton(
-                    child: Text('+ Add List'),
+                    child: const Text('+ Add List'),
                     onPressed: () {
                       addShift('add', null);
                     },
                     // style: ElevatedButton.styleFrom(primary: Colors.green),
                   ),
                 ),
-                if (shiftList.length != 0 || shiftList.isNotEmpty)
+                if (shiftList.isNotEmpty)
                   Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     width: double.infinity,
@@ -203,7 +203,7 @@ class _ShiftChangeScreenState extends State<ShiftChangeScreen> {
                                     onPressed: (context) {
                                       addShift('edit', e.key);
                                     },
-                                    backgroundColor: Color(0xFF21B7CA),
+                                    backgroundColor: const Color(0xFF21B7CA),
                                     foregroundColor: Colors.white,
                                     icon: Icons.edit,
                                   ),
@@ -221,10 +221,10 @@ class _ShiftChangeScreenState extends State<ShiftChangeScreen> {
                                           });
                                       ;
                                     },
-                                    backgroundColor: Color(0xFFFE4A49),
+                                    backgroundColor: const Color(0xFFFE4A49),
                                     foregroundColor: Colors.white,
                                     icon: Icons.delete,
-                                    borderRadius: BorderRadius.only(
+                                    borderRadius: const BorderRadius.only(
                                       topRight: Radius.circular(10),
                                       bottomRight: Radius.circular(10),
                                     ),
@@ -258,13 +258,13 @@ class _ShiftChangeScreenState extends State<ShiftChangeScreen> {
                                       child: Text(
                                         'Shift Change ${e.key + 1}',
                                         textAlign: TextAlign.start,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
                                     ),
                                     Container(
-                                      padding: EdgeInsets.symmetric(
+                                      padding: const EdgeInsets.symmetric(
                                         vertical: 5,
                                         horizontal: 10,
                                       ),
@@ -279,7 +279,7 @@ class _ShiftChangeScreenState extends State<ShiftChangeScreen> {
                                         children: [
                                           Text(
                                             '${DateFormat('dd MMM yyyy').format(e.value['shiftStartDate'])} - ${DateFormat('dd MMM yyyy').format(e.value['shiftEndDate'])}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,
                                             ),

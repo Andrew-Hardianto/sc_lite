@@ -776,6 +776,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return targets;
   }
 
+  ontap() {
+    mainService.showModalSuccess(
+      context,
+      'CheckInOut',
+      'CheckInOut',
+      'requestId',
+      'params',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final profile = Provider.of<UserProvider>(context).user;
@@ -817,7 +827,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         InkWell(
                           key: _key2,
                           borderRadius: BorderRadius.circular(50),
-                          onTap: () {},
+                          onTap: () {
+                            ontap();
+                          },
                           child: const Icon(
                             Icons.notifications_outlined,
                             size: 43.0,

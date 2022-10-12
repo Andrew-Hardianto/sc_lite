@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:jwt_decode_full/jwt_decode_full.dart';
+import 'package:sc_lite/views/screen/home/home_screen.dart';
+import 'package:sc_lite/views/widget/modal/request-success/request_success.dart';
 import 'package:sc_lite/views/widget/snackbar/snackbar_message.dart';
 import 'package:encrypt/encrypt.dart' as encrypts;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -294,6 +296,10 @@ class MainService {
     }
   }
 
+  degreesToRadians(dynamic degrees) {
+    return degrees * pi / 180;
+  }
+
   checkPackage(dynamic arrPackage) {
     if (arrPackage == null) {
       return true;
@@ -441,6 +447,36 @@ class MainService {
     }
   }
 
+  postUrlApiHttpFormData(
+    String urlApi,
+    bool loading,
+    file,
+    data,
+    Function callback,
+  ) async {
+    Map<String, String> headers = {
+      'X-TenantID': '${await getTenantId()}',
+      'Authorization': 'Bearer ${await getAccessToken()}',
+      "AuthorizationToken": '${await getAuthoritiesToken()}',
+    };
+
+    var request = http.MultipartRequest('POST', Uri.parse(urlApi));
+    if (file != null) {
+      request.files.add(file);
+    }
+
+    request.headers.addAll(headers);
+    request.fields['checkinout'] = jsonEncode(data);
+    var res = await request.send();
+
+    if (loading) {
+      showLoading();
+      callback(res);
+    } else {
+      callback(res);
+    }
+  }
+
   postFormDataUrlApi(
       String urlApi, data, bool loading, Function callback) async {
     Map<String, String> headers = {
@@ -454,11 +490,12 @@ class MainService {
     }
 
     try {
-      var formData = FormData.fromMap(data);
+      print(data);
+      // var formData = FormData.fromMap(data);
 
       var res = await dio.post(
         urlApi,
-        data: formData,
+        data: data,
         options: Options(headers: headers, sendTimeout: 35000),
       );
 
@@ -510,7 +547,7 @@ class MainService {
 
   void errorHandlingDio(dynamic res, BuildContext context) {
     if (res.response.statusCode == 401 || res.response.statusCode == 400) {
-      var msg = jsonDecode(res.response);
+      var msg = res.response;
       if (msg == '') {
         showSnackbarError(context, msg);
       } else {
@@ -536,6 +573,30 @@ class MainService {
       }
       showSnackbarError(
           context, "Can't connect to server. Please Contact Admin!");
+    } else {
+      showSnackbarError(
+          context, "Can't connect to server. Please Contact Admin!");
+    }
+  }
+
+  void errorHandlingHttpForm(dynamic res, BuildContext context) {
+    if (res.statusCode == 401 || res.statusCode == 400) {
+      http.Response.fromStream(res).then((value) {
+        if (value.body != '') {
+          var msg = jsonDecode(value.body)["message"];
+          var err = jsonDecode(value.body)["error_description"];
+          if (msg != "") {
+            showSnackbarError(context, msg);
+          } else {
+            showSnackbarError(context, err);
+          }
+        } else {
+          showSnackbarError(
+              context, "Can't connect to server. Please Contact Admin!");
+        }
+      });
+      // print(response);
+
     } else {
       showSnackbarError(
           context, "Can't connect to server. Please Contact Admin!");
@@ -620,6 +681,30 @@ class MainService {
         callback(res);
       }
     });
+  }
+
+  showModalSuccess(BuildContext context, String title, String statusType,
+      requestId, params) async {
+    return await showGeneralDialog(
+      context: context,
+      pageBuilder: (context, animation, secondaryAnimation) => Container(),
+      transitionBuilder: (ctx, a1, a2, child) {
+        var curve = Curves.easeInOut.transform(a1.value);
+        return Transform.scale(
+          scale: curve,
+          child: RequestSuccess(
+            title: title,
+            statusType: statusType,
+            requestId: requestId,
+            params: params,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    ).then(
+      (value) =>
+          Navigator.of(context).pushReplacementNamed(HomeScreen.routeName),
+    );
   }
 
   String imgBack =

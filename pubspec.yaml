@@ -92,6 +92,14 @@ flutter:
     - assets/image/approval/    
     - assets/image/profile/
     - assets/image/get-started/
+    - assets/image/self-service/
+    - assets/image/self-service/shift-change/
+    - assets/image/self-service/overtime/
+    - assets/image/self-service/checkinout/
+    - assets/image/self-service/permission/
+    - assets/image/self-service/time-off/
+    - assets/image/self-service/leave/
+    - assets/image/self-service/sick/
     - assets/icon/
     - assets/icon/home/
     - assets/icon/status/

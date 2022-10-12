@@ -294,11 +294,7 @@ class _AddTimeOffState extends State<AddTimeOff> {
               child: TextField(
                 maxLines: 3,
                 controller: timeoffNotes,
-                onChanged: (value) {
-                  setState(() {
-                    print(value);
-                  });
-                },
+                onChanged: (value) {},
                 decoration: InputDecoration(
                   hintText: 'Max. 225 words',
                   border: OutlineInputBorder(

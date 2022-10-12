@@ -1,17 +1,24 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' show cos, sqrt, asin, sin, atan2;
 
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sc_lite/service/main_service.dart';
+import 'package:sc_lite/views/screen/home/home_screen.dart';
 import 'package:sc_lite/views/widget/map/google_map_screen.dart';
+import 'package:sc_lite/views/widget/snackbar/snackbar_message.dart';
 import 'package:sc_lite/views/widget/text-appbar/text_appbar.dart';
 import 'package:location/location.dart';
 import 'package:sc_lite/utils/extension.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:http/http.dart' as http;
 
 class CheckinoutScreen extends StatefulWidget {
   static const String routeName = '/self-service/checkinout';
@@ -33,9 +40,14 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
 
   bool takePhoto = false;
   File? image;
+  dynamic imageBytes;
 
   int groupValue = 0;
-  bool userLoc = false;
+  bool isOutOfOffice = false;
+  bool validateLoc = true;
+
+  String userLocation = 'inOffice';
+
   final Location location = Location();
 
   double lat = 0.0;
@@ -45,20 +57,36 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
   num companyLat = 0;
   num toleranceMeter = 0;
 
+  bool maps = false;
+
+  bool requiredSelfie = false;
+
   String? selectedItem;
 
   bool isButtonActive = false;
+
+  dynamic formData;
+  // Map<String, dynamic> formData = {};
 
   @override
   void initState() {
     super.initState();
     getListPurpose();
     getLocation();
+    validatePhoto();
+    getUserLoc();
+    _remarks.addListener(isEmpty);
   }
 
   @override
   void dispose() {
     super.dispose();
+    maps = false;
+  }
+
+  @override
+  void setState(fn) {
+    if (mounted) super.setState(fn);
   }
 
   reloadMap() {
@@ -76,10 +104,23 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
         var data = jsonDecode(res.body);
         setState(() {
           purposeList = data;
+          print(purposeList);
         });
       } else {
         mainService.errorHandlingHttp(res, context);
       }
+    });
+  }
+
+  getUserLoc() {
+    location.onLocationChanged.listen((event) {
+      // if (mounted) {
+      setState(() {
+        lat = event.latitude!;
+        lng = event.longitude!;
+        maps = true;
+      });
+      // }
     });
   }
 
@@ -92,11 +133,13 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
         mainService.errorHandlingHttp(res, context);
       } else {
         var data = jsonDecode(res.body);
+        // if (mounted) {
         setState(() {
           companyLat = data["latitude"];
           companyLong = data["longitude"];
           toleranceMeter = data["toleranceInMeter"];
         });
+        // }
       }
     });
   }
@@ -108,9 +151,74 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
       setState(() {
         image = File(img.path);
       });
+      // if (image != null) {
+      //   var imgByte = image!.readAsBytesSync();
+      //   var fileName = image!.path.split('/').last;
+      //   var ext = fileName.split('.').last;
+
+      //   imageBytes = MultipartFile.fromBytes(
+      //     imgByte,
+      //     filename: fileName,
+      //     contentType: MediaType(
+      //       'image',
+      //       ext,
+      //     ),
+      //   );
+      // }
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
     }
+  }
+
+  isEmpty() {
+    if (_remarks.text == "" && isOutOfOffice ||
+        isOutOfOffice && selectedItem == null ||
+        requiredSelfie && image == null) {
+      setState(() {
+        isButtonActive = false;
+      });
+    } else if (_remarks.text != "" && isOutOfOffice ||
+        selectedItem != null ||
+        requiredSelfie && image != null) {
+      setState(() {
+        isButtonActive = true;
+      });
+    }
+  }
+
+  validatePhoto() async {
+    String urlApi =
+        '${await mainService.urlApi()}/api/lookup/global-key?name=TM_PROPERTIES';
+    mainService.getUrlHttp(urlApi, false, (res) {
+      if (res.statusCode == 200) {
+        var data = jsonDecode(res.body);
+        var filter = data
+            .where((element) =>
+                element['name'] == "TM_CHECK_INOUT_REQUIRED_SELFIE")
+            .toList();
+
+        if (filter[0] != null) {
+          setState(() {
+            requiredSelfie = filter[0]['value'] == "Y" ? true : false;
+          });
+        }
+        setState(() {
+          takePhoto = requiredSelfie;
+        });
+      } else {
+        mainService.errorHandlingHttp(res, context);
+      }
+    });
+  }
+
+  handleTogglePhoto() {
+    setState(() {
+      if (requiredSelfie) {
+        takePhoto = true;
+      } else {
+        takePhoto = !takePhoto;
+      }
+    });
   }
 
   showBottomSheet(BuildContext context) async {
@@ -222,7 +330,163 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
         });
   }
 
-  submitData(BuildContext context) {}
+  selectedPurpose(dynamic value) {
+    setState(() {
+      selectedItem = value as String?;
+    });
+  }
+
+  checkDistance(
+    dynamic latitude,
+    dynamic longitude,
+    dynamic toleranceMeter,
+    Function? callback,
+  ) {
+    var R = 6378137;
+    var dLat = mainService.degreesToRadians(lat - latitude);
+    var dLong = mainService.degreesToRadians(lng - longitude);
+    var a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(mainService.degreesToRadians(companyLat)) *
+            cos(mainService.degreesToRadians(companyLat)) *
+            sin(dLong / 2) *
+            sin(dLong / 2);
+
+    var c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    var distance = R * c;
+
+    if (distance > toleranceMeter) {
+      validateLoc = true;
+      callback!(true);
+    } else {
+      validateLoc = false;
+      callback!(false);
+    }
+  }
+
+  changeLoc(dynamic loc) {
+    setState(() {
+      groupValue = loc;
+      if (loc == 1) {
+        validateLoc = false;
+        userLocation = "outOffice";
+        isOutOfOffice = true;
+      } else {
+        validateLoc = true;
+        userLocation = "inOffice";
+        isOutOfOffice = false;
+        getLocation();
+      }
+    });
+  }
+
+  submitCheckInOut(dynamic type) {
+    checkDistance(companyLat, companyLong, toleranceMeter,
+        (bool farFromOffice) async {
+      final strBytesLat = utf8.encode(lat.toString());
+      final base64Lat = base64.encode(strBytesLat);
+      final strBytesLng = utf8.encode(lng.toString());
+      final base64Lng = base64.encode(strBytesLng);
+
+      Map<String, dynamic> payload = {
+        "actualLatEnc": base64Lat,
+        "actualLngEnc": base64Lng,
+        "outOfOffice": isOutOfOffice,
+        "purpose": !isOutOfOffice ? '' : selectedItem,
+        "remark": !isOutOfOffice ? 'In The Office' : _remarks.text,
+        "type": dataType['type'] == 'Check In' ? 'CHECKIN' : 'CHECKOUT'
+      };
+      print(takePhoto);
+      if (takePhoto) {
+        if (image == null) {
+          showSnackbarError(context, 'You must take Photo!');
+          mainService.hideLoading();
+          return;
+        } else {
+          // formData = {'checkinout': payload, 'file': imageBytes};
+          var imgByte = image!.readAsBytesSync();
+          var fileName = image!.path.split('/').last;
+          var ext = fileName.split('.').last;
+
+          formData = http.MultipartFile.fromBytes(
+            'file',
+            imgByte,
+            filename: fileName,
+            contentType: MediaType(
+              'image',
+              ext,
+            ),
+          );
+        }
+      } else {
+        formData = null;
+      }
+
+      if (farFromOffice) {
+        if (userLocation == "outOffice") {
+          submitData(type, formData, payload);
+        } else {
+          mainService.hideLoading();
+          showSnackbarError(context, "You're too far from Office");
+          return;
+        }
+      } else {
+        submitData(type, formData, payload);
+      }
+    });
+  }
+
+  submitData(dynamic type, formdata, dynamic payload) async {
+    String urlApi =
+        '${await mainService.urlApi()}/api/user/self-service/check-in-out';
+
+    // await mainService.postFormDataUrlApi(urlApi, payload, false, (res) {
+    //   print({"res": res.response});
+    //   if (res.response == "" || res.response.statusCode != 200) {
+    //     mainService.hideLoading();
+    //     mainService.errorHandlingDio(res, context);
+    //   } else {
+    //     mainService.hideLoading();
+    //     if (type == 'CHECKOUT') {
+    //       mainService.showModalSuccess(
+    //         context,
+    //         'CheckInOut',
+    //         'CheckInOut',
+    //         res.response ? res.response : null,
+    //         null,
+    //       );
+    //     } else {
+    //       Navigator.of(context)
+    //           .pushReplacementNamed(HomeScreen.routeName)
+    //           .whenComplete(() => showSnackbarSuccess(
+    //               context, 'Thank You! Your Check In Successfully Submitted.'));
+    //     }
+    //   }
+    // });
+    mainService.postUrlApiHttpFormData(urlApi, false, formData, payload, (res) {
+      if (res.statusCode == 200) {
+        mainService.hideLoading();
+        if (type == 'CHECKOUT') {
+          http.Response.fromStream(res).then((value) {
+            var data = jsonDecode(value.body);
+            mainService.showModalSuccess(
+              context,
+              'CheckInOut',
+              'CheckInOut',
+              data['id'],
+              null,
+            );
+          });
+        } else {
+          Navigator.of(context)
+              .pushReplacementNamed(HomeScreen.routeName)
+              .whenComplete(() => showSnackbarSuccess(
+                  context, 'Thank You! Your Check In Successfully Submitted.'));
+        }
+      } else {
+        mainService.errorHandlingHttpForm(res, context);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +539,23 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
-                  // child: const MapScreen(),
+                  child: maps
+                      ? MapScreen(
+                          lat: lat,
+                          lng: lng,
+                        )
+                      : Shimmer.fromColors(
+                          baseColor: Colors.grey.shade300,
+                          highlightColor: Colors.grey,
+                          child: Container(
+                            width: double.infinity,
+                            height: 200.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6),
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
                 ),
                 Container(
                   padding:
@@ -297,14 +577,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                       ),
                     },
                     onValueChanged: (val) {
-                      setState(() {
-                        groupValue = val;
-                        if (val == 1) {
-                          userLoc = true;
-                        } else {
-                          userLoc = false;
-                        }
-                      });
+                      changeLoc(val);
                     },
                   ),
                 ),
@@ -321,14 +594,21 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Take a photo!'),
-                            Switch(
-                                value: takePhoto,
-                                onChanged: (v) {
-                                  setState(() {
-                                    takePhoto = v;
-                                  });
-                                })
+                            !takePhoto
+                                ? const Text(
+                                    'Take a photo!',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                : const Text('Selfie your passion !',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                            if (!requiredSelfie)
+                              Switch(
+                                  value: takePhoto,
+                                  onChanged: (v) {
+                                    handleTogglePhoto();
+                                  })
                           ],
                         ),
                         if (takePhoto)
@@ -364,7 +644,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                                           color: Colors.grey,
                                         ),
                                         Text(
-                                          'Take Photo',
+                                          'Take / Upload Photos',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,
@@ -424,11 +704,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                           );
                         }).toList(),
                         onChanged: (value) {
-                          print(value);
-                          setState(() {
-                            selectedItem = value as String?;
-                          });
-                          print(value);
+                          selectedPurpose(value);
                         },
                         value: selectedItem,
                       ),
@@ -462,6 +738,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                         ),
                         TextField(
                           controller: _remarks,
+                          maxLines: 3,
                           decoration: InputDecoration(
                             hintText: 'Example : Fixing Module',
                             border: const OutlineInputBorder(
@@ -490,9 +767,9 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: ElevatedButton(
-                    onPressed: isButtonActive
+                    onPressed: isButtonActive || !isOutOfOffice
                         ? () {
-                            submitData(context);
+                            submitCheckInOut(type);
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
