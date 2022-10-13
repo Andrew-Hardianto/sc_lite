@@ -45,7 +45,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // _initPage();
   }
 
   Widget? _initPage() {
@@ -136,7 +135,7 @@ Future<void> requestPermission() async {
   );
 
   FirebaseMessaging.instance.getToken().then((value) async {
-    print(value);
+    print({"token": value});
     await MainService()
         .storage
         .write(key: 'YLI2Q4W', value: MainService().encrypt(value!));

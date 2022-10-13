@@ -1,33 +1,35 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
+import 'package:sc_lite/service/main_service.dart';
 
-class MapScreen extends StatefulWidget {
+class ApprovalMap extends StatefulWidget {
   final double lat;
   final double lng;
-  const MapScreen({
-    Key? key,
+  const ApprovalMap({
+    super.key,
     required this.lat,
     required this.lng,
-  }) : super(key: key);
+  });
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  State<ApprovalMap> createState() => _ApprovalMapState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _ApprovalMapState extends State<ApprovalMap> {
+  final mainService = MainService();
   Completer<GoogleMapController> _controller = Completer();
-  Location location = Location();
   final Set<Marker> newMarker = {};
 
-  double officeLatitude = -7.05770065;
-  double officeLongitude = 110.41586081;
+  double latitude = -7.05770065;
+  double longitude = 110.41586081;
+  dynamic customIcon;
 
   @override
   void initState() {
     super.initState();
+    getIcon();
     getLocation();
   }
 
@@ -43,30 +45,27 @@ class _MapScreenState extends State<MapScreen> {
     controller.dispose();
   }
 
+  getIcon() async {
+    var iconMarker = await mainService.bitmapDescriptorFromSvgAsset(
+        context, 'assets/icon/general/pin-map.svg');
+    print(iconMarker);
+    setState(() {
+      customIcon = iconMarker;
+    });
+    // BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(24, 24)),
+    //         'assets/icon/general/Pin-Maps.png')
+    //     .then((d) {
+    //   print({'b': d});
+    //   setState(() {
+    //     customIcon = d;
+    //   });
+    // });
+  }
+
   getLocation() async {
-    // _mapCtrl = controller;
     final GoogleMapController mapCtrl = await _controller.future;
 
     try {
-      // location.onLocationChanged.listen((LocationData currentLocation) {
-      //   mapCtrl.animateCamera(
-      //     CameraUpdate.newCameraPosition(
-      //       CameraPosition(
-      //           target: LatLng(
-      //               currentLocation.latitude!, currentLocation.longitude!),
-      //           zoom: 15),
-      //     ),
-      //   );
-      //   if (mounted) {
-      //     setState(() {
-      //       newMarker.add(Marker(
-      //         markerId: const MarkerId('m1'),
-      //         position:
-      //             LatLng(currentLocation.latitude!, currentLocation.longitude!),
-      //       ));
-      //     });
-      //   }
-      // });
       mapCtrl.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(target: LatLng(widget.lat, widget.lng), zoom: 15),
@@ -74,10 +73,13 @@ class _MapScreenState extends State<MapScreen> {
       );
       if (mounted) {
         setState(() {
-          newMarker.add(Marker(
-            markerId: const MarkerId('m1'),
-            position: LatLng(widget.lat, widget.lng),
-          ));
+          newMarker.add(
+            Marker(
+              markerId: const MarkerId('m1'),
+              position: LatLng(widget.lat, widget.lng),
+              icon: BitmapDescriptor.defaultMarker,
+            ),
+          );
         });
       }
     } catch (err) {
@@ -94,8 +96,8 @@ class _MapScreenState extends State<MapScreen> {
       child: GoogleMap(
         initialCameraPosition: CameraPosition(
           target: LatLng(
-            officeLatitude,
-            officeLongitude,
+            latitude,
+            longitude,
           ),
           zoom: 16,
         ),

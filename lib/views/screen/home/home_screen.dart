@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:device_uuid/device_uuid.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
@@ -95,6 +96,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late StreamSubscription _sub;
 
   initPage() {
+    // foreground notif
+    FirebaseMessaging.onMessage.listen((event) {
+      if (event.notification != null) {
+        print({'fg': event.notification!.title});
+      }
+    });
+
+    // notif background on terminate onclick
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+      if (message != null) {
+        print({'initial msg': message.notification!.title});
+      }
+    });
+
+    //  on background click
+    FirebaseMessaging.onMessageOpenedApp.listen((event) {
+      print(event.notification!.body);
+    });
+
     isSkeletonLoading = true;
     isSkeletonLoadingQuickAccess = true;
     isSkeletonLoadingMenuAccess = true;

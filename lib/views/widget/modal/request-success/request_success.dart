@@ -203,7 +203,7 @@ class _RequestSuccessState extends State<RequestSuccess> {
                       color: '#A1E6FF'.toColor(),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
                           '${widget.requestId}',

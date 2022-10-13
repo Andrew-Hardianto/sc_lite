@@ -151,20 +151,6 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
       setState(() {
         image = File(img.path);
       });
-      // if (image != null) {
-      //   var imgByte = image!.readAsBytesSync();
-      //   var fileName = image!.path.split('/').last;
-      //   var ext = fileName.split('.').last;
-
-      //   imageBytes = MultipartFile.fromBytes(
-      //     imgByte,
-      //     filename: fileName,
-      //     contentType: MediaType(
-      //       'image',
-      //       ext,
-      //     ),
-      //   );
-      // }
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
     }
@@ -395,7 +381,7 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
         "remark": !isOutOfOffice ? 'In The Office' : _remarks.text,
         "type": dataType['type'] == 'Check In' ? 'CHECKIN' : 'CHECKOUT'
       };
-      print(takePhoto);
+
       if (takePhoto) {
         if (image == null) {
           showSnackbarError(context, 'You must take Photo!');
@@ -439,30 +425,9 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
     String urlApi =
         '${await mainService.urlApi()}/api/user/self-service/check-in-out';
 
-    // await mainService.postFormDataUrlApi(urlApi, payload, false, (res) {
-    //   print({"res": res.response});
-    //   if (res.response == "" || res.response.statusCode != 200) {
-    //     mainService.hideLoading();
-    //     mainService.errorHandlingDio(res, context);
-    //   } else {
-    //     mainService.hideLoading();
-    //     if (type == 'CHECKOUT') {
-    //       mainService.showModalSuccess(
-    //         context,
-    //         'CheckInOut',
-    //         'CheckInOut',
-    //         res.response ? res.response : null,
-    //         null,
-    //       );
-    //     } else {
-    //       Navigator.of(context)
-    //           .pushReplacementNamed(HomeScreen.routeName)
-    //           .whenComplete(() => showSnackbarSuccess(
-    //               context, 'Thank You! Your Check In Successfully Submitted.'));
-    //     }
-    //   }
-    // });
-    mainService.postUrlApiHttpFormData(urlApi, false, formData, payload, (res) {
+    var data = {"type": "checkinout", "payload": payload};
+
+    mainService.postUrlApiHttpFormData(urlApi, false, formData, data, (res) {
       if (res.statusCode == 200) {
         mainService.hideLoading();
         if (type == 'CHECKOUT') {
@@ -477,9 +442,8 @@ class _CheckinoutScreenState extends State<CheckinoutScreen>
             );
           });
         } else {
-          Navigator.of(context)
-              .pushReplacementNamed(HomeScreen.routeName)
-              .whenComplete(() => showSnackbarSuccess(
+          Navigator.of(context).pushReplacementNamed(HomeScreen.routeName).then(
+              (value) => showSnackbarSuccess(
                   context, 'Thank You! Your Check In Successfully Submitted.'));
         }
       } else {

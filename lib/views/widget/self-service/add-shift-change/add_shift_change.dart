@@ -71,9 +71,11 @@ class _AddShiftChangeState extends State<AddShiftChange> {
       if (data.statusCode == 200) {
         mainService.hideLoading();
         List<dynamic> resData = jsonDecode(data.body);
-        setState(() {
-          optShift = resData;
-        });
+        if (mounted) {
+          setState(() {
+            optShift = resData;
+          });
+        }
         return optShift;
       } else {
         mainService.hideLoading();
@@ -145,7 +147,7 @@ class _AddShiftChangeState extends State<AddShiftChange> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
-                    width: 130,
+                    width: (MediaQuery.of(context).size.width / 100) * 30,
                     child: const Text(
                       'From',
                       textAlign: TextAlign.start,
@@ -157,7 +159,7 @@ class _AddShiftChangeState extends State<AddShiftChange> {
                     width: 20,
                   ),
                   Container(
-                    width: 130,
+                    width: (MediaQuery.of(context).size.width / 100) * 30,
                     child: const Text(
                       'To',
                       textAlign: TextAlign.start,
@@ -174,13 +176,16 @@ class _AddShiftChangeState extends State<AddShiftChange> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  TextDate(
-                    onClick: () {
-                      selectedDate('start');
-                    },
-                    ctrl: startDate,
-                    hint: 'DD/MM/YYYY',
-                    align: TextAlign.center,
+                  SizedBox(
+                    width: (MediaQuery.of(context).size.width / 100) * 32.5,
+                    child: TextDate(
+                      onClick: () {
+                        selectedDate('start');
+                      },
+                      ctrl: startDate,
+                      hint: 'DD/MM/YYYY',
+                      align: TextAlign.center,
+                    ),
                   ),
                   Container(
                     width: 20,
@@ -192,13 +197,16 @@ class _AddShiftChangeState extends State<AddShiftChange> {
                       ),
                     ),
                   ),
-                  TextDate(
-                    onClick: () {
-                      selectedDate('end');
-                    },
-                    ctrl: endDate,
-                    hint: 'DD/MM/YYYY',
-                    align: TextAlign.center,
+                  SizedBox(
+                    width: (MediaQuery.of(context).size.width / 100) * 32.5,
+                    child: TextDate(
+                      onClick: () {
+                        selectedDate('end');
+                      },
+                      ctrl: endDate,
+                      hint: 'DD/MM/YYYY',
+                      align: TextAlign.center,
+                    ),
                   ),
                 ],
               ),
@@ -248,7 +256,7 @@ class _AddShiftChangeState extends State<AddShiftChange> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
-                    width: 130,
+                    width: (MediaQuery.of(context).size.width / 100) * 30,
                     child: ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
@@ -260,7 +268,7 @@ class _AddShiftChangeState extends State<AddShiftChange> {
                         )),
                   ),
                   SizedBox(
-                    width: 130,
+                    width: (MediaQuery.of(context).size.width / 100) * 30,
                     child: ElevatedButton(
                       onPressed: addShift,
                       child: Text(widget.action == 'add' ? 'ADD' : 'EDIT'),

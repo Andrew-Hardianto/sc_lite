@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:sc_lite/service/main_service.dart';
 import 'package:sc_lite/views/screen/transaction/transaction-detail/checkinout-detail/checkinout_detail.dart';
+import 'package:sc_lite/views/widget/approval-map/approval_map.dart';
 import 'package:sc_lite/views/widget/text-appbar/text_appbar.dart';
 import 'package:sc_lite/utils/extension.dart';
 
@@ -26,6 +27,9 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
   String activeDataStatus = 'In Progress';
   List listData = [];
 
+  double latitude = -7.05770065;
+  double longitude = 110.41586081;
+
   num indexPaging = 0;
   num sizeData = 100;
 
@@ -42,6 +46,7 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
   bool selectAll = false;
 
   bool searchActive = false;
+  // bool skeletonMap = true;
 
   List status = [
     {
@@ -76,6 +81,11 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
     super.initState();
     getListData(activeDataStatus);
     filter.addListener(isFilterEmpty);
+  }
+
+  @override
+  void setState(fn) {
+    if (mounted) super.setState(fn);
   }
 
   isFilterEmpty() {
@@ -182,10 +192,6 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
           : urlApi = "$urlApi&orderBy=DESC";
     }
 
-    // https://ng-api-dev.gitsolutions.id/api/user/self-service/check-in-out/status/my-request?status=In%20Progress&orderBy=DESC
-
-    // https://ng-api-dev.gitsolutions.id/api/user/self-service/check-in-out/status/my-request?status=In%20Progress&sortDirection=ASC&sortBy=requestDate
-
     mainService.getUrlHttp(urlApi, true, (res) {
       if (res.statusCode == 200) {
         mainService.hideLoading();
@@ -226,9 +232,9 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
 
   checkEvent(val, dynamic requestId) {
     var totalItems = listData.length;
-    setState(() {
-      var idx = listData.indexWhere((res) => res['requestId'] == requestId);
+    var idx = listData.indexWhere((res) => res['requestId'] == requestId);
 
+    setState(() {
       listData[idx]['check'] = val;
 
       var checked = 0;
@@ -245,7 +251,11 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
       }
     });
 
-    // handleMarker(listData[idx]);
+    handleMarker(listData[idx]);
+  }
+
+  handleMarker(data) {
+    print(data);
   }
 
   @override
@@ -512,8 +522,13 @@ class _CheckinoutListScreenState extends State<CheckinoutListScreen> {
                       margin: const EdgeInsets.only(top: 10),
                       height: 130,
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10.0),
-                          color: '#F3F3F3'.toColor()),
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: '#F3F3F3'.toColor(),
+                      ),
+                      child: ApprovalMap(
+                        lat: latitude,
+                        lng: longitude,
+                      ),
                     ),
                   ),
                   Container(

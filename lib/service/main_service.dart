@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:jwt_decode_full/jwt_decode_full.dart';
 import 'package:sc_lite/views/screen/home/home_screen.dart';
 import 'package:sc_lite/views/widget/modal/request-success/request_success.dart';
@@ -432,7 +435,7 @@ class MainService {
       'X-TenantID': '${await getTenantId()}',
       'Authorization': 'Bearer ${await getAccessToken()}',
       "AuthorizationToken": '${await getAuthoritiesToken()}',
-      // "content-type": "application/json"
+      "content-type": "application/json"
     };
 
     var res = await http
@@ -466,7 +469,7 @@ class MainService {
     }
 
     request.headers.addAll(headers);
-    request.fields['checkinout'] = jsonEncode(data);
+    request.fields[data['type']] = jsonEncode(data['payload']);
     var res = await request.send();
 
     if (loading) {
@@ -705,6 +708,18 @@ class MainService {
       (value) =>
           Navigator.of(context).pushReplacementNamed(HomeScreen.routeName),
     );
+  }
+
+  Future<dynamic> bitmapDescriptorFromSvgAsset(
+      BuildContext context, String assetName) async {
+    String svgString =
+        await DefaultAssetBundle.of(context).loadString(assetName);
+    //Draws string representation of svg to DrawableRoot
+    DrawableRoot svgDrawableRoot = await svg.fromSvgString(svgString, 'null');
+    ui.Picture picture = svgDrawableRoot.toPicture();
+    ui.Image image = await picture.toImage(26, 37);
+    ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
   }
 
   String imgBack =

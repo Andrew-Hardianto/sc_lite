@@ -1,37 +1,37 @@
 {
   "project_info": {
-    "project_number": "782103737429",
-    "project_id": "starconnect-4bd57",
-    "storage_bucket": "starconnect-4bd57.appspot.com"
+    "project_number": "878001451824",
+    "project_id": "starconnect-dev",
+    "storage_bucket": "starconnect-dev.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:782103737429:android:a5071a31b500b099fd90dc",
+        "mobilesdk_app_id": "1:878001451824:android:a2412ad2c10fe203134ef5",
         "android_client_info": {
           "package_name": "com.git.sc"
         }
       },
       "oauth_client": [
         {
-          "client_id": "782103737429-lodrrto6q6m5jbl0m7kuggd4bqg5gq3t.apps.googleusercontent.com",
+          "client_id": "878001451824-invhds2f0jnn8mdmlesueebh0u22re15.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC4xgaoLzK1L4wTOhQ9qwei45YC-QhcIOg"
+          "current_key": "AIzaSyDSrrebK5Qs-bRFvsM0znKZBsC7HTR5zrI"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "782103737429-lodrrto6q6m5jbl0m7kuggd4bqg5gq3t.apps.googleusercontent.com",
+              "client_id": "878001451824-invhds2f0jnn8mdmlesueebh0u22re15.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "782103737429-sjohv7qril4ruqg1aih6qf02rur1nri7.apps.googleusercontent.com",
+              "client_id": "878001451824-6tjul9jv2ifcar8fjhei46vk56kvm4h9.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.git.sc"
@@ -43,31 +43,31 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:782103737429:android:9e439d681a629973fd90dc",
+        "mobilesdk_app_id": "1:878001451824:android:7ec23c02c20ed91b134ef5",
         "android_client_info": {
           "package_name": "com.git.sclite"
         }
       },
       "oauth_client": [
         {
-          "client_id": "782103737429-lodrrto6q6m5jbl0m7kuggd4bqg5gq3t.apps.googleusercontent.com",
+          "client_id": "878001451824-invhds2f0jnn8mdmlesueebh0u22re15.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC4xgaoLzK1L4wTOhQ9qwei45YC-QhcIOg"
+          "current_key": "AIzaSyDSrrebK5Qs-bRFvsM0znKZBsC7HTR5zrI"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "782103737429-lodrrto6q6m5jbl0m7kuggd4bqg5gq3t.apps.googleusercontent.com",
+              "client_id": "878001451824-invhds2f0jnn8mdmlesueebh0u22re15.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "782103737429-sjohv7qril4ruqg1aih6qf02rur1nri7.apps.googleusercontent.com",
+              "client_id": "878001451824-6tjul9jv2ifcar8fjhei46vk56kvm4h9.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.git.sc"
